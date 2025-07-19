@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bike Rental Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-title {
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <form class="form-container needs-validation" id="bikeRentalForm" novalidate enctype="multipart/form-data">
+        <div class="form-title">Bike Rental Form</div>
+
+        <!-- Alert Message -->
+        <div id="alertMsg" class="alert alert-danger d-none" role="alert">
+          Please fill in all required fields before submitting.
+        </div>
+
+        <div class="mb-3">
+          <label for="fullName" class="form-label">Full Name *</label>
+          <input type="text" class="form-control" id="fullName" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email Address *</label>
+          <input type="email" class="form-control" id="email" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone Number *</label>
+          <input type="tel" class="form-control" id="phone" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="bikeModel" class="form-label">Select Bike Model *</label>
+          <div class="input-group">
+            <select class="form-select" id="bikeModel" required>
+              <option value="" disabled selected>Choose a bike</option>
+              <option>Honda Activa</option>
+              <option>Royal Enfield</option>
+              <option>Bajaj Pulsar</option>
+              <option>KTM Duke</option>
+            </select>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
+              View Bikes
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="rentalDays" class="form-label">Rental Duration (in days) *</label>
+          <input type="number" class="form-control" id="rentalDays" min="1" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="pickupDate" class="form-label">Pickup Date *</label>
+          <input type="date" class="form-control" id="pickupDate" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="dropoffDate" class="form-label">Drop-off Date *</label>
+          <input type="date" class="form-control" id="dropoffDate" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="riderPic" class="form-label">Upload Rider Picture *</label>
+          <input type="file" class="form-control" id="riderPic" accept="image/*" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="licenseNumber" class="form-label">License Number *</label>
+          <input type="text" class="form-control" id="licenseNumber" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="aadharUpload" class="form-label">Upload Aadhar Card (Image/PDF) *</label>
+          <input type="file" class="form-control" id="aadharUpload" accept=".jpg,.jpeg,.png,.pdf" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bike Modal -->
+<div class="modal fade" id="bikeModal" tabindex="-1" aria-labelledby="bikeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bikeModalLabel">Choose Your Bike</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <!-- Bike 1 -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <img src="https://via.placeholder.com/400x250?text=Honda+Activa" class="card-img-top" alt="Honda Activa">
+              <div class="card-body">
+                <h5 class="card-title">Honda Activa</h5>
+                <p class="card-text">Mileage: 50 km/l<br>Rent: ₹300/day</p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-model="Honda Activa" data-bs-dismiss="modal">Select</button>
+              </div>
+            </div>
+          </div>
+          <!-- Bike 2 -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <img src="https://via.placeholder.com/400x250?text=Royal+Enfield" class="card-img-top" alt="Royal Enfield">
+              <div class="card-body">
+                <h5 class="card-title">Royal Enfield</h5>
+                <p class="card-text">Mileage: 35 km/l<br>Rent: ₹600/day</p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-model="Royal Enfield" data-bs-dismiss="modal">Select</button>
+              </div>
+            </div>
+          </div>
+          <!-- Bike 3 -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <img src="https://via.placeholder.com/400x250?text=Bajaj+Pulsar" class="card-img-top" alt="Bajaj Pulsar">
+              <div class="card-body">
+                <h5 class="card-title">Bajaj Pulsar</h5>
+                <p class="card-text">Mileage: 45 km/l<br>Rent: ₹400/day</p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-model="Bajaj Pulsar" data-bs-dismiss="modal">Select</button>
+              </div>
+            </div>
+          </div>
+          <!-- Bike 4 -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <img src="https://via.placeholder.com/400x250?text=KTM+Duke" class="card-img-top" alt="KTM Duke">
+              <div class="card-body">
+                <h5 class="card-title">KTM Duke</h5>
+                <p class="card-text">Mileage: 30 km/l<br>Rent: ₹750/day</p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-model="KTM Duke" data-bs-dismiss="modal">Select</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- modal-body -->
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript Validation & Modal Integration -->
+<script>
+  const form = document.getElementById('bikeRentalForm');
+  const alertBox = document.getElementById('alertMsg');
+
+  form.addEventListener('submit', function(event) {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+      alertBox.classList.remove('d-none');
+    } else {
+      alertBox.classList.add('d-none');
+    }
+
+    form.classList.add('was-validated');
+  });
+
+  // Auto-set selected bike from modal into dropdown
+  document.querySelectorAll('.select-bike').forEach(button => {
+    button.addEventListener('click', function() {
+      const model = this.getAttribute('data-model');
+      const select = document.getElementById('bikeModel');
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].text === model) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
