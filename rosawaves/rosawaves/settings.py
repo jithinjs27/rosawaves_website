@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rosawaves_app',
+    'adminpanel',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -77,10 +78,13 @@ WSGI_APPLICATION = 'rosawaves.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rosawaves_database',         # Your DB name
+        'USER': 'root',                # Default XAMPP user
+        'PASSWORD': '',                # Default is empty
     }
 }
+
 
 
 # Password validation

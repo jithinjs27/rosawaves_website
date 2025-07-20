@@ -1,3 +1,15 @@
+# rental/models.py
 from django.db import models
+from adminpanel.models import BikeModel  # Import from the other app
 
-# Create your models here.
+class BikeRental(models.Model):
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    bike_model = models.CharField(max_length=50)
+    rental_days = models.PositiveIntegerField()
+    pickup_date = models.DateField()
+    dropoff_date = models.DateField()
+    rider_pic = models.ImageField(upload_to='riders/')
+    license_number = models.CharField(max_length=50)
+    aadhar_upload = models.FileField(upload_to='aadhar_docs/')
