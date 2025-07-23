@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ROSAWAVES Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f5f8fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background-color: #3d4f69;
+      color: #fff;
+      padding: 1.5rem;
+      position: fixed;
+      width: 230px;
+    }
+
+    .main-content {
+      margin-left: 230px;
+      padding: 2rem;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-right: 8px;
+    }
+
+    .status-dot {
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-green {
+      background-color: #00c18b;
+    }
+
+    .status-red {
+      background-color: #ff4d4f;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .notification {
+      position: relative;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #00c18b;
+      color: white;
+      border-radius: 50%;
+      font-size: 10px;
+      padding: 3px 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4>ROSAWAVES</h4>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Top Right Icons -->
+    <div class="top-bar mb-4">
+      <i class="bi bi-brightness-high"></i>
+      <i class="bi bi-gear"></i>
+      <div class="notification">
+        <i class="bi bi-bell"></i>
+        <span class="notification-badge">3</span>
+      </div>
+      <i class="bi bi-person"></i>
+    </div>
+
+    <!-- Stat Cards -->
+    <!-- Stat Cards with Links -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <a href="/active_bookings" class="text-decoration-none">
+      <div class="card p-4 text-center">
+        <h6>Active Booking</h6>
+        <div class="text-success"><span class="stat-icon">↑</span>20</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/return-due/" class="text-decoration-none">
+      <div class="card p-4 text-center">
+        <h6>Return Due</h6>
+        <div class="text-danger"><span class="stat-icon">↓</span>2</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/deposit-pending/" class="text-decoration-none">
+      <div class="card p-4 text-center">
+        <h6>Deposit Pending</h6>
+        <div class="text-success"><span class="stat-icon">↑</span>5</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+
+    <!-- Requests Table with Approve/Reject Links -->
+<div class="card p-4">
+  <h6 class="mb-3">Requests</h6>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <strong>Isabella Christensen</strong><br>
+      <small class="text-muted">Lorem Ipsum is simply dummy text of...</small>
+    </div>
+    <div>
+      <span class="status-dot status-green"></span>
+      <small class="ms-2">11 MAY 12:56</small>
+      <a href="/reject/1" class="btn btn-sm btn-light ms-3 text-primary">Reject</a>
+      <a href="/approve/1" class="btn btn-sm btn-info text-white ms-2">Approve</a>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <strong>Mathilde Andersen</strong><br>
+      <small class="text-muted">Lorem Ipsum is simply dummy text of...</small>
+    </div>
+    <div>
+      <span class="status-dot status-red"></span>
+      <small class="ms-2">11 MAY 10:35</small>
+      <a href="/reject/2" class="btn btn-sm btn-light ms-3 text-primary">Reject</a>
+      <a href="/approve/2" class="btn btn-sm btn-info text-white ms-2">Approve</a>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <strong>Karla Sorensen</strong><br>
+      <small class="text-muted">Lorem Ipsum is simply dummy text of...</small>
+    </div>
+    <div>
+      <span class="status-dot status-green"></span>
+      <small class="ms-2">9 MAY 17:38</small>
+      <a href="/reject/3" class="btn btn-sm btn-light ms-3 text-primary">Reject</a>
+      <a href="/approve/3" class="btn btn-sm btn-info text-white ms-2">Approve</a>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</body>
+</html>

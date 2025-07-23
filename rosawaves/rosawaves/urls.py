@@ -22,7 +22,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('rosawaves_app.urls'))
+    path('',include('rosawaves_app.urls')),
+    path('',include('adminpanel.urls'))
 ]
 
 if settings.DEBUG:
