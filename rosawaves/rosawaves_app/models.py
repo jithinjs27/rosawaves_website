@@ -13,3 +13,4 @@ class BikeRental(models.Model):
     rider_pic = models.ImageField(upload_to='riders/')
     license_number = models.CharField(max_length=50)
     aadhar_upload = models.FileField(upload_to='aadhar_docs/')
+    status=models.CharField(max_length=50,default="pending")
