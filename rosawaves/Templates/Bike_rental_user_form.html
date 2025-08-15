@@ -72,16 +72,16 @@
 
         <div class="mb-3">
           <label for="rentalDays" class="form-label">Rental Duration (in days) *</label>
-          <input type="number" name="rental_days" class="form-control" id="rentalDays" min="1" required>
+          <input type="number" name="rental_days" class="form-control" id="rentalDays" min="1" readonly required>
         </div>
 
         <div class="mb-3">
-          <label for="pickupDate" class="form-label">Pickup Date *</label>
+          <label for="pickupDate" class="form-label">Booking Date *</label>
           <input type="date" name="pickup_date" class="form-control" id="pickupDate" required>
         </div>
 
         <div class="mb-3">
-          <label for="dropoffDate" class="form-label">Drop-off Date *</label>
+          <label for="dropoffDate" class="form-label">End Date *</label>
           <input type="date" name="dropoff_date" class="form-control" id="dropoffDate" required>
         </div>
 
@@ -96,8 +96,24 @@
         </div>
 
         <div class="mb-3">
-          <label for="aadharUpload" class="form-label">Upload Aadhar Card (Image/PDF) *</label>
+          <label for="aadharUpload" class="form-label">Upload Aadhar Card / Passport (Image/PDF) *</label>
           <input type="file" name="aadhar_upload" class="form-control" id="aadharUpload" accept=".jpg,.jpeg,.png,.pdf" required>
+        </div>
+
+        <!-- Foreigner Question -->
+        <div class="mb-3">
+          <label for="isForeigner" class="form-label">Are you a foreigner? *</label>
+          <select name="is_foreigner" class="form-select" id="isForeigner" required>
+            <option value="" disabled selected>Choose an option</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- Passport Number (hidden by default) -->
+        <div class="mb-3 d-none" id="passportField">
+          <label for="passportNumber" class="form-label">Passport Number *</label>
+          <input type="text" name="passport_number" class="form-control" id="passportNumber">
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
@@ -116,7 +132,6 @@
       </div>
       <div class="modal-body">
         <div class="row g-4">
-          <!-- Repeat cards as needed -->
           <div class="col-md-6">
             <div class="card h-100">
               <img src="https://via.placeholder.com/400x250?text=Honda+Activa" class="card-img-top" alt="Honda Activa">
@@ -147,7 +162,6 @@
     } else {
       alertBox.classList.add('d-none');
     }
-
     form.classList.add('was-validated');
   });
 
@@ -163,6 +177,50 @@
       }
     });
   });
+
+  // Toggle passport field
+  const isForeignerSelect = document.getElementById('isForeigner');
+  const passportField = document.getElementById('passportField');
+  const passportInput = document.getElementById('passportNumber');
+
+  isForeignerSelect.addEventListener('change', function () {
+    if (this.value === 'yes') {
+      passportField.classList.remove('d-none');
+      passportInput.setAttribute('required', 'required');
+    } else {
+      passportField.classList.add('d-none');
+      passportInput.removeAttribute('required');
+      passportInput.value = '';
+    }
+  });
+
+  // Auto-calculate rental days
+  const pickupDate = document.getElementById('pickupDate');
+  const dropoffDate = document.getElementById('dropoffDate');
+  const rentalDays = document.getElementById('rentalDays');
+
+  function calculateDays() {
+    if (pickupDate.value && dropoffDate.value) {
+      const start = new Date(pickupDate.value);
+      const end = new Date(dropoffDate.value);
+      const diffTime = end - start;
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // If same date, set to 1
+      if (diffDays === 0) {
+        diffDays = 1;
+      }
+
+      if (diffDays > 0) {
+        rentalDays.value = diffDays;
+      } else {
+        rentalDays.value = '';
+      }
+    }
+  }
+
+  pickupDate.addEventListener('change', calculateDays);
+  dropoffDate.addEventListener('change', calculateDays);
 </script>
 
 </body>

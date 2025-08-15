@@ -45,3 +45,8 @@ def bike_rental_view(request):
 
 def success_view(request):
     return render(request, 'success.html')
+
+def contact_view(request):
+    return render(request,"User_contact_page.html")
+def booking_status_view(request):
+    return render(request,"Booking_status.html")
