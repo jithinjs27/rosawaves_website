@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import BikeRentalForm
+from adminpanel.models import BikeModel
 
 from django.shortcuts import render, redirect
 from .models import BikeRental
@@ -11,7 +12,8 @@ from .models import BikeRental
 def user_home_page(request):
     return render(request,"index_user_home_page.html")
 def user_bike_rental(request):
-    return render(request,"Bike_rental_user_form.html")
+    bikes = BikeModel.objects.all()
+    return render(request,"Bike_rental_user_form.html",{"bikes": bikes})
 
 
 def bike_rental_view(request):
@@ -50,3 +52,20 @@ def contact_view(request):
     return render(request,"User_contact_page.html")
 def booking_status_view(request):
     return render(request,"Booking_status.html")
+
+def booking_status(request):
+    query = request.GET.get("q", "")  # Get search input
+    bookings = []
+
+    if query:
+        bookings = BikeRental.objects.filter(
+            email__icontains=query
+        ) | BikeRental.objects.filter(id__icontains=query)  # adjust if booking ID field is different
+
+    return render(request, "booking_status.html", {"bookings": bookings, "query": query})
+
+def payment_page(request, booking_id):
+    booking = get_object_or_404(BikeRental, id=booking_id)
+    return render(request, "payment.html", {"booking": booking})
+
+

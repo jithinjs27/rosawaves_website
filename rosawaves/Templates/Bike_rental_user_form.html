@@ -59,10 +59,9 @@
           <div class="input-group">
             <select class="form-select" name="bike_model" id="bikeModel" required>
               <option value="" disabled selected>Choose a bike</option>
-              <option>Honda Activa</option>
-              <option>Royal Enfield</option>
-              <option>Bajaj Pulsar</option>
-              <option>KTM Duke</option>
+              {% for bike in bikes %}
+                <option value="{{ bike.id }}">{{ bike.name }}</option>
+              {% endfor %}
             </select>
             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
               View Bikes
@@ -132,17 +131,27 @@
       </div>
       <div class="modal-body">
         <div class="row g-4">
+          {% for bike in bikes %}
           <div class="col-md-6">
             <div class="card h-100">
-              <img src="https://via.placeholder.com/400x250?text=Honda+Activa" class="card-img-top" alt="Honda Activa">
+              {% if bike.image %}
+                <img src="{{ bike.image.url }}" class="card-img-top" alt="{{ bike.name }}">
+              {% else %}
+                <img src="https://via.placeholder.com/400x250?text={{ bike.name }}" class="card-img-top" alt="{{ bike.name }}">
+              {% endif %}
               <div class="card-body">
-                <h5 class="card-title">Honda Activa</h5>
-                <p class="card-text">Mileage: 50 km/l<br>Rent: ₹300/day</p>
-                <button type="button" class="btn btn-primary w-100 select-bike" data-model="Honda Activa" data-bs-dismiss="modal">Select</button>
+                <h5 class="card-title">{{ bike.name }}</h5>
+                <p class="card-text">
+                  Vehicle number : {{ bike.mileage }}<br>
+                  Rent: ₹{{ bike.rent_per_day }}/day
+                </p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-bs-dismiss="modal">
+                  Select
+                </button>
               </div>
             </div>
           </div>
-          <!-- Add other bikes here -->
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -167,14 +176,8 @@
 
   document.querySelectorAll('.select-bike').forEach(button => {
     button.addEventListener('click', function() {
-      const model = this.getAttribute('data-model');
-      const select = document.getElementById('bikeModel');
-      for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].text === model) {
-          select.selectedIndex = i;
-          break;
-        }
-      }
+      const bikeId = this.getAttribute('data-id');
+      document.getElementById('bikeModel').value = bikeId;
     });
   });
 
