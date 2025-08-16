@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Table with Actions</title>
+    <title>Active Bookings</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,21 +24,10 @@
             padding: 20px;
             margin-bottom: 30px;
         }
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
         .table-title {
             font-size: 1.5rem;
             font-weight: 600;
             color: #343a40;
-        }
-        .action-btn-group {
-            display: flex;
-            gap: 10px;
         }
         .btn-edit {
             color: #0d6efd;
@@ -49,73 +38,13 @@
         .btn-edit:hover {
             background-color: rgba(13, 110, 253, 0.2);
         }
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        .status-active {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        .status-pending {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        .status-completed {
-            background-color: #e0f2fe;
-            color: #0369a1;
-        }
-        @media (max-width: 768px) {
-            .table-responsive {
-                border: none;
-            }
-            .table thead {
-                display: none;
-            }
-            .table, .table tbody, .table tr, .table td {
-                display: block;
-                width: 100%;
-            }
-            .table tr {
-                margin-bottom: 15px;
-                border: 1px solid #dee2e6;
-                border-radius: 5px;
-                padding: 10px;
-            }
-            .table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-                border-bottom: 1px solid #f1f1f1;
-            }
-            .table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                width: 40%;
-                padding-right: 10px;
-                font-weight: 600;
-                text-align: left;
-                color: #495057;
-            }
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="table-container">
-        <div class="table-header">
-            <h2 class="table-title">Active bookings</h2>
-<!--            <div class="action-btn-group">-->
-<!--                <button class="btn btn-sm btn-outline-primary">-->
-<!--                    <i class="fas fa-plus me-1"></i> Add New-->
-<!--                </button>-->
-<!--                <button class="btn btn-sm btn-outline-secondary">-->
-<!--                    <i class="fas fa-filter me-1"></i> Filter-->
-<!--                </button>-->
-<!--            </div>-->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="table-title">Active Bookings</h2>
         </div>
 
         <div class="table-responsive">
@@ -125,34 +54,81 @@
                         <th>Full Name</th>
                         <th>Pickup Date</th>
                         <th>Dropoff Date</th>
-                        <th>ID number</th>
+                        <th>ID Number</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for booking in active_bookings %}
                     <tr>
-                        <td data-label="Full Name">{{ booking.full_name }}</td>
-                        <td data-label="Pickup Date">{{ booking.pickup_date }}</td>
-                        <td data-label="Dropoff Date">{{ booking.dropoff_date }}</td>
-                        <td data-label="ID number ">
-                            {{booking.license_number}}
-<!--                            {% if booking.status == "Active" %}-->
-<!--                                <span class="status-badge status-active">Active</span>-->
-<!--                            {% elif booking.status == "Pending" %}-->
-<!--                                <span class="status-badge status-pending">Pending</span>-->
-<!--                            {% elif booking.status == "Completed" %}-->
-<!--                                <span class="status-badge status-completed">Completed</span>-->
-<!--                            {% else %}-->
-<!--                                <span class="status-badge bg-secondary text-white">Unknown</span>-->
-<!--                            {% endif %}-->
-                        </td>
-                        <td data-label="Actions">
-                            <a href="" class="btn btn-sm btn-edit">
+                        <td>{{ booking.full_name }}</td>
+                        <td>{{ booking.pickup_date }}</td>
+                        <td>{{ booking.dropoff_date }}</td>
+                        <td>{{ booking.license_number }}</td>
+                        <td>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ booking.id }}">
                                 <i class="fas fa-edit me-1"></i> Edit
-                            </a>
+                            </button>
                         </td>
                     </tr>
+
+                    <!-- Modal for Editing Booking -->
+                    <div class="modal fade" id="editBookingModal{{ booking.id }}" tabindex="-1" aria-labelledby="editBookingModalLabel{{ booking.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <form method="post" action="{% url 'edit_booking' booking.id %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="editBookingModalLabel{{ booking.id }}">Edit Booking - {{ booking.full_name }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                              <div class="row g-3">
+                                  <div class="col-md-6">
+                                      <label class="form-label">Full Name</label>
+                                      <input type="text" name="full_name" value="{{ booking.full_name }}" class="form-control" required>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Email</label>
+                                      <input type="email" name="email" value="{{ booking.email }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Phone</label>
+                                      <input type="text" name="phone" value="{{ booking.phone }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Bike Model</label>
+                                      <input type="text" name="bike_model" value="{{ booking.bike_model }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Pickup Date</label>
+                                      <input type="date" name="pickup_date" value="{{ booking.pickup_date }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Dropoff Date</label>
+                                      <input type="date" name="dropoff_date" value="{{ booking.dropoff_date }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">License Number</label>
+                                      <input type="text" name="license_number" value="{{ booking.license_number }}" class="form-control">
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="modal-footer">
+                              <button type="submit" class="btn btn-primary">
+                                  <i class="fas fa-save me-1"></i> Save Changes
+                              </button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                  <i class="fas fa-times me-1"></i> Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
                     {% empty %}
                     <tr>
                         <td colspan="5" class="text-center text-muted">No bookings available.</td>
@@ -161,25 +137,10 @@
                 </tbody>
             </table>
         </div>
-
-<!--        <nav aria-label="Page navigation">-->
-<!--            <ul class="pagination justify-content-center">-->
-<!--                &lt;!&ndash; Optional pagination &ndash;&gt;-->
-<!--                <li class="page-item disabled">-->
-<!--                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>-->
-<!--                </li>-->
-<!--                <li class="page-item active"><a class="page-link" href="#">1</a></li>-->
-<!--                <li class="page-item"><a class="page-link" href="#">2</a></li>-->
-<!--                <li class="page-item"><a class="page-link" href="#">3</a></li>-->
-<!--                <li class="page-item">-->
-<!--                    <a class="page-link" href="#">Next</a>-->
-<!--                </li>-->
-<!--            </ul>-->
-<!--        </nav>-->
     </div>
 </div>
 
-<!-- Bootstrap Bundle -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

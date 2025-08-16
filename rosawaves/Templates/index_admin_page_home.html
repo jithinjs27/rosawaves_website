@@ -51,6 +51,10 @@
       background-color: #ff4d4f;
     }
 
+    .status-yellow {
+      background-color: #ffc107;
+    }
+
     .top-bar {
       display: flex;
       justify-content: flex-end;
@@ -71,6 +75,16 @@
       font-size: 10px;
       padding: 3px 6px;
     }
+
+    /* Resize modal images */
+    .modal-img {
+      max-width: 200px;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -87,71 +101,114 @@
     <div class="top-bar mb-4">
       <i class="bi bi-brightness-high"></i>
       <i class="bi bi-gear"></i>
-      <div class="notification">
-        <i class="bi bi-bell"></i>
-        <span class="notification-badge">3</span>
-      </div>
+<!--      <div class="notification">-->
+<!--        <i class="bi bi-bell"></i>-->
+<!--        <span class="notification-badge">3</span>-->
+<!--      </div>-->
       <i class="bi bi-person"></i>
     </div>
 
     <!-- Stat Cards -->
-    <!-- Stat Cards with Links -->
-<div class="row mb-4">
-  <div class="col-md-4">
-    <a href="/active_bookings" class="text-decoration-none">
-      <div class="card p-4 text-center">
-        <h6>Active Booking</h6>
-        <div class="text-success"><span class="stat-icon">↑</span>20</div>
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <a href="/active_bookings" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>Active Booking</h6>
+          </div>
+        </a>
       </div>
-    </a>
-  </div>
-  <div class="col-md-4">
-    <a href="/return_due_bookings" class="text-decoration-none">
-      <div class="card p-4 text-center">
-        <h6>Return Due</h6>
-        <div class="text-danger"><span class="stat-icon">↓</span>2</div>
+      <div class="col-md-4">
+        <a href="/return_due_bookings" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>Return Due</h6>
+          </div>
+        </a>
       </div>
-    </a>
-  </div>
-  <div class="col-md-4">
-    <a href="/deposit-pending/" class="text-decoration-none">
-      <div class="card p-4 text-center">
-        <h6>Deposit Pending</h6>
-        <div class="text-success"><span class="stat-icon">↑</span>5</div>
+      <div class="col-md-4">
+        <a href="/deposit_pending" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>Deposit Payment</h6>
+          </div>
+        </a>
       </div>
-    </a>
-  </div>
-</div>
-
-
- <!-- Requests Table with Approve/Reject Links -->
-<div class="card p-4">
-  <h6 class="mb-3">Pending Requests</h6>
-
-  {% for request in pending_requests %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <strong>{{ request.full_name }}</strong><br>
-      <small class="text-muted">
-        {{ request.email }}<br>
-        {{ request.phone }}<br>
-        License: {{ request.license_number }}
-      </small>
     </div>
-    <div>
-      <span class="status-dot status-yellow"></span> <!-- Use status color if needed -->
-      <small class="ms-2">{{ request.pickup_date }}</small>
-      <a href="{% url 'reject_booking' request.id %}" class="btn btn-sm btn-light ms-3 text-primary">Reject</a>
-      <a href="{% url 'approve_booking' request.id %}" class="btn btn-sm btn-info text-white ms-2">Approve</a>
+
+    <!-- Requests Table with Approve/Reject Links -->
+    <div class="card p-4">
+      <h6 class="mb-3">Pending Requests</h6>
+
+      {% for request in pending_requests %}
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <strong>{{ request.full_name }}</strong><br>
+          <small class="text-muted">
+            {{ request.email }}<br>
+            {{ request.phone }}<br>
+            License: {{ request.license_number }}
+          </small>
+        </div>
+        <div>
+          <span class="status-dot status-yellow"></span>
+          <small class="ms-2">{{ request.pickup_date }}</small>
+
+          <!-- View Details Button -->
+          <button class="btn btn-sm btn-warning text-white ms-3" data-bs-toggle="modal" data-bs-target="#detailsModal{{ request.id }}">
+            View Details
+          </button>
+
+          <!-- Reject / Approve -->
+          <a href="{% url 'reject_booking' request.id %}" class="btn btn-sm btn-light ms-2 text-primary">Reject</a>
+          <a href="{% url 'approve_booking' request.id %}" class="btn btn-sm btn-info text-white ms-2">Approve</a>
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="detailsModal{{ request.id }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ request.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="detailsModalLabel{{ request.id }}">Booking Details - {{ request.full_name }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>Name:</strong> {{ request.full_name }}</p>
+              <p><strong>Email:</strong> {{ request.email }}</p>
+              <p><strong>Phone:</strong> {{ request.phone }}</p>
+              <p><strong>License Number:</strong> {{ request.license_number }}</p>
+              <p><strong>Pickup Date:</strong> {{ request.pickup_date }}</p>
+              <p><strong>Dropoff Date:</strong> {{ request.dropoff_date }}</p>
+              <p><strong>Bike Model:</strong> {{ request.bike_model }}</p>
+              <p><strong>Rental Days:</strong> {{ request.rental_days }}</p>
+              <p><strong>Status:</strong> {{ request.status }}</p>
+
+              <h6 class="mt-3">Uploaded Documents</h6>
+
+              <!-- Rider Picture -->
+              {% if request.rider_pic %}
+                <p><strong>Rider Picture:</strong></p>
+                <img src="{{ request.rider_pic.url }}" class="modal-img" alt="Rider Picture">
+              {% endif %}
+
+              <!-- Aadhar Upload -->
+              {% if request.aadhar_upload %}
+                <p><strong>Documents:</strong></p>
+                <a href="{{ request.aadhar_upload.url }}" target="_blank" class="btn btn-sm btn-primary">
+                  View Document
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% empty %}
+      <p>No pending requests found.</p>
+      {% endfor %}
     </div>
   </div>
-  {% empty %}
-  <p>No pending requests found.</p>
-  {% endfor %}
-</div>
 
-
-
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </body>
