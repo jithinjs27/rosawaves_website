@@ -62,7 +62,7 @@ def booking_status(request):
             email__icontains=query
         ) | BikeRental.objects.filter(id__icontains=query)  # adjust if booking ID field is different
 
-    return render(request, "booking_status.html", {"bookings": bookings, "query": query})
+    return render(request, "Booking_status.html", {"bookings": bookings, "query": query})
 
 def payment_page(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
