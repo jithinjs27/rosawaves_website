@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bike Rental Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #e9ecef;
+      padding: 20px;
+    }
+    .form-container {
+      background-color: #f8f9fa;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .form-title {
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <form class="form-container needs-validation" id="bikeRentalForm" method="POST" action="{% url 'bike_rental_submit' %}" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="form-title">Bike Rental Form</div>
+
+        <div id="alertMsg" class="alert alert-danger d-none" role="alert">
+          Please fill in all required fields before submitting.
+        </div>
+
+        <div class="mb-3">
+          <label for="fullName" class="form-label">Full Name *</label>
+          <input type="text" name="full_name" class="form-control" id="fullName" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email Address *</label>
+          <input type="email" name="email" class="form-control" id="email" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone Number *</label>
+          <input type="tel" name="phone" class="form-control" id="phone" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="bikeModel" class="form-label">Select Bike Model *</label>
+          <div class="input-group">
+            <select class="form-select" name="bike_model" id="bikeModel" required>
+              <option value="" disabled selected>Choose a bike</option>
+              {% for bike in bikes %}
+                <option value="{{ bike.id }}">{{ bike.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
+              View Bikes
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="rentalDays" class="form-label">Rental Duration (in days) *</label>
+          <input type="number" name="rental_days" class="form-control" id="rentalDays" min="1" readonly required>
+        </div>
+
+        <div class="mb-3">
+          <label for="pickupDate" class="form-label">Booking Date *</label>
+          <input type="date" name="pickup_date" class="form-control" id="pickupDate" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="dropoffDate" class="form-label">End Date *</label>
+          <input type="date" name="dropoff_date" class="form-control" id="dropoffDate" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="riderPic" class="form-label">Upload Rider Picture *</label>
+          <input type="file" name="rider_pic" class="form-control" id="riderPic" accept="image/*" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="licenseNumber" class="form-label">License Number *</label>
+          <input type="text" name="license_number" class="form-control" id="licenseNumber" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="aadharUpload" class="form-label">Upload Aadhar Card / Passport (Image/PDF) *</label>
+          <input type="file" name="aadhar_upload" class="form-control" id="aadharUpload" accept=".jpg,.jpeg,.png,.pdf" required>
+        </div>
+
+        <!-- Foreigner Question -->
+        <div class="mb-3">
+          <label for="isForeigner" class="form-label">Are you a foreigner? *</label>
+          <select name="is_foreigner" class="form-select" id="isForeigner" required>
+            <option value="" disabled selected>Choose an option</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- Passport Number (hidden by default) -->
+        <div class="mb-3 d-none" id="passportField">
+          <label for="passportNumber" class="form-label">Passport Number *</label>
+          <input type="text" name="passport_number" class="form-control" id="passportNumber">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bike Modal -->
+<div class="modal fade" id="bikeModal" tabindex="-1" aria-labelledby="bikeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bikeModalLabel">Choose Your Bike</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          {% for bike in bikes %}
+          <div class="col-md-6">
+            <div class="card h-100">
+              {% if bike.image %}
+                <img src="{{ bike.image.url }}" class="card-img-top" alt="{{ bike.name }}">
+              {% else %}
+                <img src="https://via.placeholder.com/400x250?text={{ bike.name }}" class="card-img-top" alt="{{ bike.name }}">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ bike.name }}</h5>
+                <p class="card-text">
+                  Vehicle number : {{ bike.mileage }}<br>
+                  Rent: ₹{{ bike.rent_per_day }}/day
+                </p>
+                <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-bs-dismiss="modal">
+                  Select
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const form = document.getElementById('bikeRentalForm');
+  const alertBox = document.getElementById('alertMsg');
+
+  form.addEventListener('submit', function(event) {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+      alertBox.classList.remove('d-none');
+    } else {
+      alertBox.classList.add('d-none');
+    }
+    form.classList.add('was-validated');
+  });
+
+  document.querySelectorAll('.select-bike').forEach(button => {
+    button.addEventListener('click', function() {
+      const bikeId = this.getAttribute('data-id');
+      document.getElementById('bikeModel').value = bikeId;
+    });
+  });
+
+  // Toggle passport field
+  const isForeignerSelect = document.getElementById('isForeigner');
+  const passportField = document.getElementById('passportField');
+  const passportInput = document.getElementById('passportNumber');
+
+  isForeignerSelect.addEventListener('change', function () {
+    if (this.value === 'yes') {
+      passportField.classList.remove('d-none');
+      passportInput.setAttribute('required', 'required');
+    } else {
+      passportField.classList.add('d-none');
+      passportInput.removeAttribute('required');
+      passportInput.value = '';
+    }
+  });
+
+  // Auto-calculate rental days
+  const pickupDate = document.getElementById('pickupDate');
+  const dropoffDate = document.getElementById('dropoffDate');
+  const rentalDays = document.getElementById('rentalDays');
+
+  function calculateDays() {
+    if (pickupDate.value && dropoffDate.value) {
+      const start = new Date(pickupDate.value);
+      const end = new Date(dropoffDate.value);
+      const diffTime = end - start;
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // If same date, set to 1
+      if (diffDays === 0) {
+        diffDays = 1;
+      }
+
+      if (diffDays > 0) {
+        rentalDays.value = diffDays;
+      } else {
+        rentalDays.value = '';
+      }
+    }
+  }
+
+  pickupDate.addEventListener('change', calculateDays);
+  dropoffDate.addEventListener('change', calculateDays);
+</script>
+
+</body>
+</html>

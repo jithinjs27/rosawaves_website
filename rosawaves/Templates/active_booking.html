@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Bookings</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #343a40;
+        }
+        .btn-edit {
+            color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-edit:hover {
+            background-color: rgba(13, 110, 253, 0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="table-title">Active Bookings</h2>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Pickup Date</th>
+                        <th>Dropoff Date</th>
+                        <th>ID Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in active_bookings %}
+                    <tr>
+                        <td>{{ booking.full_name }}</td>
+                        <td>{{ booking.pickup_date }}</td>
+                        <td>{{ booking.dropoff_date }}</td>
+                        <td>{{ booking.license_number }}</td>
+                        <td>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ booking.id }}">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Modal for Editing Booking -->
+                    <div class="modal fade" id="editBookingModal{{ booking.id }}" tabindex="-1" aria-labelledby="editBookingModalLabel{{ booking.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <form method="post" action="{% url 'edit_booking' booking.id %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="editBookingModalLabel{{ booking.id }}">Edit Booking - {{ booking.full_name }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                              <div class="row g-3">
+                                  <div class="col-md-6">
+                                      <label class="form-label">Full Name</label>
+                                      <input type="text" name="full_name" value="{{ booking.full_name }}" class="form-control" required>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Email</label>
+                                      <input type="email" name="email" value="{{ booking.email }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Phone</label>
+                                      <input type="text" name="phone" value="{{ booking.phone }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Bike Model</label>
+                                      <input type="text" name="bike_model" value="{{ booking.bike_model }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Pickup Date</label>
+                                      <input type="date" name="pickup_date" value="{{ booking.pickup_date }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Dropoff Date</label>
+                                      <input type="date" name="dropoff_date" value="{{ booking.dropoff_date }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">License Number</label>
+                                      <input type="text" name="license_number" value="{{ booking.license_number }}" class="form-control">
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="modal-footer">
+                              <button type="submit" class="btn btn-primary">
+                                  <i class="fas fa-save me-1"></i> Save Changes
+                              </button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                  <i class="fas fa-times me-1"></i> Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No bookings available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
