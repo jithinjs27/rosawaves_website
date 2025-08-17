@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-&o4jbs+$n)^n__=p3$y=3z7wdm9^@wr!xhrj=wb)q7c^p+$7y7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -79,9 +79,10 @@ WSGI_APPLICATION = 'rosawaves.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'rosawaves_database',         # Your DB name
-        'USER': 'root',                # Default XAMPP user
-        'PASSWORD': '',                # Default is empty
+        'NAME': 'jithin2711$rosawaves_database',         # Your DB name
+        'USER': 'jithin2711',                # Default XAMPP user
+        'PASSWORD': 'sreekala',                # Default is empty
+        'HOST':'jithin2711.mysql.pythonanywhere-services.com'
     }
 }
 
