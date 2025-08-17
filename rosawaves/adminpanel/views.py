@@ -49,6 +49,8 @@ def edit_booking(request, booking_id):
         booking.pickup_date = request.POST.get("pickup_date")
         booking.dropoff_date = request.POST.get("dropoff_date")
         booking.license_number = request.POST.get("license_number")
+        booking.advance_amount=request.POST.get("advance_amount")
+        booking.deposit_amount=request.POST.get("deposit_amount")
         booking.save()
         return redirect("active_bookings_page")  # go back to bookings table
 
@@ -97,30 +99,43 @@ def deposit_pending(request):
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 
-def process_return(request):
-    if request.method == "POST":
-        booking_id = request.POST.get("booking_id")
-        # total_deposit = request.POST.get("total_deposit")
-        # amount_deducted = request.POST.get("amount_deducted")
-        # remarks = request.POST.get("remarks")
+def process_return(request, booking_id):
+    # Find the booking
+    booking = get_object_or_404(BikeRental, id=booking_id)
 
-        # Fetch uniquely by booking id (no duplicates possible)
-        booking = get_object_or_404(BikeRental, id=booking_id)
+    # Example: mark booking as returned (you can customize logic)
+    booking.status = "Returned"
+    booking.save()
 
-        # booking.total_deposit = total_deposit
-        # booking.amount_deducted = amount_deducted
-        # booking.remarks = remarks
-        booking.status = "Returned"
-        booking.save()
+    # Show a success message
+    messages.success(request, f"Booking for {booking.full_name} has been marked as returned.")
 
-        messages.success(request, f"Return processed for {booking.full_name}")
-        return redirect("return_due_bookings")
+    # Redirect back to your return bookings page
+    return redirect("return_bookings")  # make sure you have a url named 'return_bookings'
 
-    return redirect("return_due_bookings")
+def return_bookings(request):
+    return_due_bookings = BikeRental.objects.filter(status="Active")
+    return render(request, "return_bookings.html", {"return_due_bookings": return_due_bookings})
 
 
+from django.shortcuts import render, get_object_or_404
 
+def generate_bill(request, booking_id):
+    booking = get_object_or_404(BikeRental, id=booking_id)
 
+    # Example Bill Calculation (you can customize logic)
+    rental_rate = 500  # example per day rent
+    total_amount = booking.rental_days * rental_rate
+    balance = total_amount - booking.advance_amount - booking.deposit_amount
+
+    context = {
+        "booking": booking,
+        "rental_rate": rental_rate,
+        "total_amount": total_amount,
+        "balance": balance,
+    }
+
+    return render(request, "bill.html", context)
 
 
 

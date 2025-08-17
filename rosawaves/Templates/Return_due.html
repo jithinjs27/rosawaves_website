@@ -36,10 +36,6 @@
             font-weight: 600;
             color: #343a40;
         }
-        .action-btn-group {
-            display: flex;
-            gap: 10px;
-        }
         .btn-edit {
             color: #0d6efd;
             background-color: rgba(13, 110, 253, 0.1);
@@ -49,23 +45,14 @@
         .btn-edit:hover {
             background-color: rgba(13, 110, 253, 0.2);
         }
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
+        .btn-return {
+            color: #198754;
+            background-color: rgba(25, 135, 84, 0.1);
+            border: none;
+            transition: all 0.3s;
         }
-        .status-active {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        .status-pending {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        .status-completed {
-            background-color: #e0f2fe;
-            color: #0369a1;
+        .btn-return:hover {
+            background-color: rgba(25, 135, 84, 0.2);
         }
         @media (max-width: 768px) {
             .table-responsive {
@@ -108,14 +95,6 @@
     <div class="table-container">
         <div class="table-header">
             <h2 class="table-title">Return bookings</h2>
-<!--            <div class="action-btn-group">-->
-<!--                <button class="btn btn-sm btn-outline-primary">-->
-<!--                    <i class="fas fa-plus me-1"></i> Add New-->
-<!--                </button>-->
-<!--                <button class="btn btn-sm btn-outline-secondary">-->
-<!--                    <i class="fas fa-filter me-1"></i> Filter-->
-<!--                </button>-->
-<!--            </div>-->
         </div>
 
         <div class="table-responsive">
@@ -135,21 +114,13 @@
                         <td data-label="Full Name">{{ booking.full_name }}</td>
                         <td data-label="Pickup Date">{{ booking.pickup_date }}</td>
                         <td data-label="Dropoff Date">{{ booking.dropoff_date }}</td>
-                        <td data-label="ID number ">
-                            {{booking.license_number}}
-<!--                            {% if booking.status == "Active" %}-->
-<!--                                <span class="status-badge status-active">Active</span>-->
-<!--                            {% elif booking.status == "Pending" %}-->
-<!--                                <span class="status-badge status-pending">Pending</span>-->
-<!--                            {% elif booking.status == "Completed" %}-->
-<!--                                <span class="status-badge status-completed">Completed</span>-->
-<!--                            {% else %}-->
-<!--                                <span class="status-badge bg-secondary text-white">Unknown</span>-->
-<!--                            {% endif %}-->
-                        </td>
+                        <td data-label="ID number ">{{ booking.license_number }}</td>
                         <td data-label="Actions">
-                            <a href="" class="btn btn-sm btn-edit">
+                            <a href="" class="btn btn-sm btn-edit me-2">
                                 <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                            <a href="{% url 'process_return' booking.id %}" class="btn btn-sm btn-return">
+                                <i class="fas fa-undo me-1"></i> Return
                             </a>
                         </td>
                     </tr>
@@ -161,21 +132,6 @@
                 </tbody>
             </table>
         </div>
-
-<!--        <nav aria-label="Page navigation">-->
-<!--            <ul class="pagination justify-content-center">-->
-<!--                &lt;!&ndash; Optional pagination &ndash;&gt;-->
-<!--                <li class="page-item disabled">-->
-<!--                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>-->
-<!--                </li>-->
-<!--                <li class="page-item active"><a class="page-link" href="#">1</a></li>-->
-<!--                <li class="page-item"><a class="page-link" href="#">2</a></li>-->
-<!--                <li class="page-item"><a class="page-link" href="#">3</a></li>-->
-<!--                <li class="page-item">-->
-<!--                    <a class="page-link" href="#">Next</a>-->
-<!--                </li>-->
-<!--            </ul>-->
-<!--        </nav>-->
     </div>
 </div>
 

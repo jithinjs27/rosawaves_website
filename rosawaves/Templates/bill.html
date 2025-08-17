@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bill - {{ booking.full_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+    <div class="container bg-white p-4 rounded shadow">
+        <h2 class="mb-4">Rental Bill</h2>
+        <p><strong>Customer:</strong> {{ booking.full_name }}</p>
+        <p><strong>Bike Model:</strong> {{ booking.bike_model }}</p>
+        <p><strong>Pickup Date:</strong> {{ booking.pickup_date }}</p>
+        <p><strong>Dropoff Date:</strong> {{ booking.dropoff_date }}</p>
+        <p><strong>Rental Days:</strong> {{ booking.rental_days }}</p>
+        <hr>
+        <p><strong>Rate per Day:</strong> ₹{{ rental_rate }}</p>
+        <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+        <p><strong>Advance Paid:</strong> ₹{{ booking.advance_amount }}</p>
+        <p><strong>Deposit:</strong> ₹{{ booking.deposit_amount }}</p>
+        <h4><strong>Balance Due:</strong> ₹{{ balance }}</h4>
+        <hr>
+        <a href="#" onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Print Bill
+        </a>
+    </div>
+</body>
+</html>

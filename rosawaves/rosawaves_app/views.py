@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect
 from .forms import BikeRentalForm
 from adminpanel.models import BikeModel
 
-
 from django.shortcuts import render, redirect
 from .models import BikeRental
 
@@ -72,5 +71,7 @@ def booking_status(request):
 def payment_page(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     return render(request, "payment.html", {"booking": booking})
+
+
 
 

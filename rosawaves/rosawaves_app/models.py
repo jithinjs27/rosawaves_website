@@ -14,5 +14,8 @@ class BikeRental(models.Model):
     license_number = models.CharField(max_length=50)
     aadhar_upload = models.FileField(upload_to='aadhar_docs/')
     status=models.CharField(max_length=50,default="pending")
-    # is_bike_return=models.CharField(max_length=50,default="False")
-    # deposit_amount=models.DecimalField(max_length=50,default=0)
+    deposit_amount=models.PositiveIntegerField(default=0)
+    total_bill_amount=models.PositiveIntegerField(default=0)
+    advance_amount=models.PositiveIntegerField(default=0)
+    remarks=models.PositiveIntegerField(default=0)
+
