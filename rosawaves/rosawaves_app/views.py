@@ -51,7 +51,7 @@ def success_view(request):
 def contact_view(request):
     return render(request,"User_contact_page.html")
 def booking_status_view(request):
-    return render(request,"Booking_status.html")
+    return render(request,"booking_status.html")
 
 def booking_status(request):
     query = request.GET.get("q", "")  # Get search input
