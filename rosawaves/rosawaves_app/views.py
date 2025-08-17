@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from .forms import BikeRentalForm
 from adminpanel.models import BikeModel
 
+
 from django.shortcuts import render, redirect
 from .models import BikeRental
 
@@ -21,7 +22,7 @@ def bike_rental_view(request):
         full_name = request.POST['full_name']
         email = request.POST['email']
         phone = request.POST['phone']
-        bike_model = request.POST['bike_model']
+        bike_id = request.POST['bike_model']   # this is a number
         rental_days = request.POST['rental_days']
         pickup_date = request.POST['pickup_date']
         dropoff_date = request.POST['dropoff_date']
@@ -29,12 +30,15 @@ def bike_rental_view(request):
         license_number = request.POST['license_number']
         aadhar_upload = request.FILES['aadhar_upload']
 
+        # Fetch the actual Bike object
+        bike = BikeModel.objects.get(id=bike_id)
+
         # Save to the database
         BikeRental.objects.create(
             full_name=full_name,
             email=email,
             phone=phone,
-            bike_model=bike_model,
+            bike_model=bike,   # 👈 save the Bike object, not just ID
             rental_days=rental_days,
             pickup_date=pickup_date,
             dropoff_date=dropoff_date,
@@ -42,8 +46,9 @@ def bike_rental_view(request):
             license_number=license_number,
             aadhar_upload=aadhar_upload
         )
-        return redirect('success_page')  # Change to your actual success URL or name
-    return render(request, 'Bike_rental_user_form.html')  # Replace with actual template name
+        return redirect('success_page')
+
+    return render(request, 'Bike_rental_user_form.html')
 
 def success_view(request):
     return render(request, 'success.html')
