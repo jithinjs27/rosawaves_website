@@ -1,6 +1,7 @@
 # rental/models.py
 from django.db import models
 from adminpanel.models import BikeModel  # Import from the other app
+from datetime import date
 
 class BikeRental(models.Model):
     full_name = models.CharField(max_length=100)
@@ -18,4 +19,5 @@ class BikeRental(models.Model):
     total_bill_amount=models.PositiveIntegerField(default=0)
     advance_amount=models.PositiveIntegerField(default=0)
     remarks=models.PositiveIntegerField(default=0)
+    return_due_date=models.PositiveIntegerField(default=0)
 

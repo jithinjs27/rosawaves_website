@@ -16,9 +16,10 @@ def active_bookings_function(request):
     today = date.today()
     active_bookings = BikeRental.objects.filter(pickup_date__lte=today, dropoff_date__gte=today,status="approved")
     return render(request, "active_booking.html", {"active_bookings": active_bookings})
+
 def return_due_function(request):
     today = date.today()
-    return_due_bookings = BikeRental.objects.filter(dropoff_date__lte=today)
+    return_due_bookings = BikeRental.objects.filter(dropoff_date__lte=today,status="approved")
     return render(request, "Return_due.html", {"return_due_bookings": return_due_bookings})
 
 
@@ -58,42 +59,8 @@ def edit_booking(request, booking_id):
 from datetime import date, timedelta
 
 def deposit_pending(request):
-    today = date.today()
-    cutoff_date = today - timedelta(days=20)
-
-    # filter returned bookings with dropoff date older than 20 days
-    deposit_booking = BikeRental.objects.filter(
-        dropoff_date__lte=cutoff_date,
-        status="returned"
-    )
-
-    # Debug print for matching bookings
-    if deposit_booking.exists():
-        print("=== DEBUG: Bookings passed 20 days and returned ===")
-        for booking in deposit_booking:
-            days_passed = (today - booking.dropoff_date).days
-            print(f"User: {booking.full_name}, Dropoff: {booking.dropoff_date}, "
-                  f"Days Passed: {days_passed}, Status: {booking.status}")
-    else:
-        print("=== DEBUG: No bookings found that passed 20 days with status returned ===")
-
-    # Add days_passed for template usage
-    booking_list = []
-    for booking in deposit_booking:
-        days_passed = (today - booking.dropoff_date).days
-        booking_list.append({
-            "id": booking.id,
-            "full_name": booking.full_name,
-            "bike_model": booking.bike_model,
-            "dropoff_date": booking.dropoff_date,
-            "days_passed": days_passed,
-            "status": booking.status,
-        })
-
-    return render(request, "Deposit_payment.html", {"Deposit_booking": booking_list})
-
-
-
+    Deposit_payment = BikeRental.objects.filter(status="Returned")
+    return render(request, "Deposit_payment.html", {"deposit_pending": Deposit_payment})
 
 
 from django.shortcuts import redirect, get_object_or_404
@@ -105,6 +72,7 @@ def process_return(request, booking_id):
 
     # Example: mark booking as returned (you can customize logic)
     booking.status = "Returned"
+    booking.dropoff_date=date.today()
     booking.save()
 
     # Show a success message

@@ -79,11 +79,14 @@ WSGI_APPLICATION = 'rosawaves.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'rosawaves_database',         # Your DB name
-        'USER': 'root',                # Default XAMPP user
-        'PASSWORD': '',                # Default is empty
+        'NAME': 'rosawaves_db',
+        'USER': 'rosawaves_user',
+        'PASSWORD': 'strongpassword123',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
 
 
 
