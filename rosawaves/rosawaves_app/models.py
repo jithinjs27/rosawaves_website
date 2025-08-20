@@ -19,5 +19,9 @@ class BikeRental(models.Model):
     total_bill_amount=models.PositiveIntegerField(default=0)
     advance_amount=models.PositiveIntegerField(default=0)
     remarks=models.PositiveIntegerField(default=0)
-    return_due_date=models.PositiveIntegerField(default=0)
+    deposit_paymet_date= models.DateField(default=date.today())
+
+
+
+
 

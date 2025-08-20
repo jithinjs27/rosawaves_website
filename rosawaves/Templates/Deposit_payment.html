@@ -94,7 +94,7 @@
 <div class="container">
     <div class="table-container">
         <div class="table-header">
-            <h2 class="table-title">Return bookings</h2>
+            <h2 class="table-title">Deposit payment</h2>
         </div>
 
         <div class="table-responsive">
@@ -106,36 +106,24 @@
                         <th>Return Date</th>
                         <th>ID number</th>
                         <th>Actions</th>
-                        <th>Payment in </th>
-
+                        <th>Payment Date</th>
+                        <th>Payment Days Remaining</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for booking in deposit_pending %}
                     <tr>
-                        <td data-label="Full Name" >{{ booking.full_name }} </td>
+                        <td data-label="Full Name">{{ booking.full_name }}</td>
                         <td data-label="Pickup Date">{{ booking.pickup_date }}</td>
                         <td data-label="Dropoff Date">{{ booking.dropoff_date }}</td>
-                        <td data-label="ID number ">{{ booking.license_number }}</td>
-                        <td data-label="Actions">
-                            <a href="" class="btn btn-sm btn-edit me-2">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </a>
-                            <a href="{% url 'process_return' booking.id %}" class="btn btn-sm btn-return">
-                                <i class="fas fa-undo me-1"></i> Return
-                            </a>
-                        </td>
-                        <td>
-                            {% if event.days_remaining >= 0 %}
-                                {{ event.days_remaining }} days left
-                            {% else %}
-                                Ended {{ event.days_remaining|abs }} days ago
-                            {% endif %}
-                        </td>
+                        <td data-label="ID number">{{ booking.license_number }}</td>
+                        <td data-label="Actions"></td>
+                        <td data-label="Payment Date" class="payment-date" data-date="{{ booking.deposit_paymet_date }}">{{ booking.deposit_paymet_date }}</td>
+                        <td data-label="Days Remaining" class="days-remaining"></td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No bookings available.</td>
+                        <td colspan="7" class="text-center text-muted">No bookings available.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -146,16 +134,40 @@
 
 <!-- Bootstrap Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript to calculate and sort -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const rows = Array.from(document.querySelectorAll("tbody tr"));
+    const today = new Date();
+
+    rows.forEach(row => {
+        const dateCell = row.querySelector(".payment-date");
+        const remainingCell = row.querySelector(".days-remaining");
+
+        if (dateCell && remainingCell) {
+            const dateStr = dateCell.getAttribute("data-date");
+            const paymentDate = new Date(dateStr);
+            const diffTime = paymentDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            remainingCell.textContent = diffDays >= 0
+                ? `${diffDays} day(s)`
+                : `Overdue by ${Math.abs(diffDays)} day(s)`;
+        }
+    });
+
+    // Sort rows by payment date
+    rows.sort((a, b) => {
+        const dateA = new Date(a.querySelector(".payment-date").getAttribute("data-date"));
+        const dateB = new Date(b.querySelector(".payment-date").getAttribute("data-date"));
+        return dateA - dateB;
+    });
+
+    // Re-append sorted rows
+    const tbody = document.querySelector("tbody");
+    rows.forEach(row => tbody.appendChild(row));
+});
+</script>
 </body>
 </html>
-
-<script>
-function calculateDays(startDate, endDate) {
-    let start = new Date(startDate);
-    let end = new Date(endDate);
-    let timeDifference = end - start;
-    let daysDifference = timeDifference / (1000 * 3600 * 24);
-    return daysDifference;
-}
-
-</script>

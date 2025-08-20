@@ -73,6 +73,7 @@ def process_return(request, booking_id):
     # Example: mark booking as returned (you can customize logic)
     booking.status = "Returned"
     booking.dropoff_date=date.today()
+    booking.deposit_paymet_date=date.today()+ timedelta(days=20)
     booking.save()
 
     # Show a success message
