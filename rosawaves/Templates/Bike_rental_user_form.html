@@ -6,6 +6,11 @@
   <title>Bike Rental Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
   <style>
     body {
       background-color: #e9ecef;
@@ -60,7 +65,7 @@
             <select class="form-select" name="bike_model" id="bikeModel" required>
               <option value="" disabled selected>Choose a bike</option>
               {% for bike in bikes %}
-                <option value="{{ bike.id }}">{{ bike.name }}</option>
+                <option value="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}">{{ bike.name }}</option>
               {% endfor %}
             </select>
             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
@@ -69,19 +74,22 @@
           </div>
         </div>
 
+        <!-- Rental Duration -->
         <div class="mb-3">
-          <label for="rentalDays" class="form-label">Rental Duration (in days) *</label>
-          <input type="number" name="rental_days" class="form-control" id="rentalDays" min="1" readonly required>
+          <label for="rentalDays" class="form-label">Rental Duration *</label>
+          <input type="text" class="form-control" id="rentalDays" readonly required>
         </div>
 
+        <!-- Pickup Date & Time -->
         <div class="mb-3">
-          <label for="pickupDate" class="form-label">Booking Date *</label>
-          <input type="date" name="pickup_date" class="form-control" id="pickupDate" required>
+          <label for="pickupDate" class="form-label">Booking Start (Date & Time) *</label>
+          <input type="text" name="pickup_date" class="form-control datetimepicker" id="pickupDate" required>
         </div>
 
+        <!-- Dropoff Date & Time -->
         <div class="mb-3">
-          <label for="dropoffDate" class="form-label">End Date *</label>
-          <input type="date" name="dropoff_date" class="form-control" id="dropoffDate" required>
+          <label for="dropoffDate" class="form-label">Booking End (Date & Time) *</label>
+          <input type="text" name="dropoff_date" class="form-control datetimepicker" id="dropoffDate" required>
         </div>
 
         <div class="mb-3">
@@ -109,14 +117,41 @@
           </select>
         </div>
 
-        <!-- Passport Number (hidden by default) -->
+        <!-- Passport Upload (shown if foreigner) -->
         <div class="mb-3 d-none" id="passportField">
-          <label for="passportNumber" class="form-label">Passport Number *</label>
-          <input type="text" name="passport_number" class="form-control" id="passportNumber">
+          <label for="passportUpload" class="form-label">Upload Passport *</label>
+          <input type="file" name="passport_upload" class="form-control" id="passportUpload" accept=".jpg,.jpeg,.png,.pdf">
+        </div>
+
+        <!-- Stay in Varkala -->
+        <div class="mb-3">
+          <label for="stayVarkala" class="form-label">Are you planning to stay in Varkala? *</label>
+          <select name="stay_varkala" class="form-select" id="stayVarkala" required>
+            <option value="" disabled selected>Choose an option</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- Hotel Booking Upload (shown if yes) -->
+        <div class="mb-3 d-none" id="hotelField">
+          <label for="hotelUpload" class="form-label">Upload Hotel Booking Confirmation *</label>
+          <input type="file" name="hotel_upload" class="form-control" id="hotelUpload" accept=".jpg,.jpeg,.png,.pdf">
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
       </form>
+
+      <!-- Booking Summary -->
+      <div class="mt-4">
+        <div class="card shadow-lg border-success">
+          <div class="card-body text-center">
+            <h5 class="card-title text-success fw-bold">Booking Amount</h5>
+            <h2 id="bookingAmountDisplay" class="fw-bold text-success">₹0</h2>
+            <input type="hidden" name="booking_amount" id="bookingAmount">
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -145,7 +180,7 @@
                   Vehicle number : {{ bike.mileage }}<br>
                   Rent: ₹{{ bike.rent_per_day }}/day
                 </p>
-                <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}" data-bs-dismiss="modal">
                   Select
                 </button>
               </div>
@@ -158,11 +193,20 @@
   </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   const form = document.getElementById('bikeRentalForm');
   const alertBox = document.getElementById('alertMsg');
+  const bookingAmount = document.getElementById('bookingAmount');
+  const bookingAmountDisplay = document.getElementById('bookingAmountDisplay');
+  const rentalDays = document.getElementById('rentalDays');
+  const pickupDate = document.getElementById('pickupDate');
+  const dropoffDate = document.getElementById('dropoffDate');
+  let selectedRent = 0;
 
+  // Validation
   form.addEventListener('submit', function(event) {
     if (!form.checkValidity()) {
       event.preventDefault();
@@ -174,56 +218,100 @@
     form.classList.add('was-validated');
   });
 
+  // Select bike
   document.querySelectorAll('.select-bike').forEach(button => {
     button.addEventListener('click', function() {
       const bikeId = this.getAttribute('data-id');
+      selectedRent = parseFloat(this.getAttribute('data-rent')) || 0;
       document.getElementById('bikeModel').value = bikeId;
+      calculateDuration();
     });
+  });
+
+  document.getElementById('bikeModel').addEventListener('change', function() {
+    selectedRent = parseFloat(this.selectedOptions[0].getAttribute('data-rent')) || 0;
+    calculateDuration();
   });
 
   // Toggle passport field
   const isForeignerSelect = document.getElementById('isForeigner');
   const passportField = document.getElementById('passportField');
-  const passportInput = document.getElementById('passportNumber');
+  const passportUpload = document.getElementById('passportUpload');
 
   isForeignerSelect.addEventListener('change', function () {
     if (this.value === 'yes') {
       passportField.classList.remove('d-none');
-      passportInput.setAttribute('required', 'required');
+      passportUpload.setAttribute('required', 'required');
     } else {
       passportField.classList.add('d-none');
-      passportInput.removeAttribute('required');
-      passportInput.value = '';
+      passportUpload.removeAttribute('required');
+      passportUpload.value = '';
     }
   });
 
-  // Auto-calculate rental days
-  const pickupDate = document.getElementById('pickupDate');
-  const dropoffDate = document.getElementById('dropoffDate');
-  const rentalDays = document.getElementById('rentalDays');
+  // Toggle hotel booking field
+  const stayVarkala = document.getElementById('stayVarkala');
+  const hotelField = document.getElementById('hotelField');
+  const hotelUpload = document.getElementById('hotelUpload');
 
-  function calculateDays() {
+  stayVarkala.addEventListener('change', function () {
+    if (this.value === 'yes') {
+      hotelField.classList.remove('d-none');
+      hotelUpload.setAttribute('required', 'required');
+    } else {
+      hotelField.classList.add('d-none');
+      hotelUpload.removeAttribute('required');
+      hotelUpload.value = '';
+    }
+  });
+
+  // Flatpickr Init
+  flatpickr(".datetimepicker", {
+    enableTime: true,
+    time_24hr: false,            // use AM/PM
+    minDate: "today",
+    altInput: true,
+    altFormat: "F j, Y h:i K",
+    dateFormat: "Y-m-d H:i"
+  });
+
+  // Duration & Billing Logic
+  function calculateDuration() {
     if (pickupDate.value && dropoffDate.value) {
       const start = new Date(pickupDate.value);
       const end = new Date(dropoffDate.value);
-      const diffTime = end - start;
-      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffMs = end - start;
 
-      // If same date, set to 1
-      if (diffDays === 0) {
-        diffDays = 1;
-      }
+      if (diffMs > 0) {
+        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        const days = Math.floor(diffHours / 24);
+        const hours = diffHours % 24;
 
-      if (diffDays > 0) {
-        rentalDays.value = diffDays;
+        // Show duration
+        rentalDays.value = days > 0 ? `${days} day(s) ${hours} hour(s)` : `${hours} hour(s)`;
+
+        // Billing
+        let total = 0;
+        if (selectedRent > 0) {
+          if (days === 0) {
+            total = selectedRent; // min 1 day
+          } else {
+            total = (days * selectedRent) + ((selectedRent / 24) * hours);
+          }
+        }
+
+        bookingAmount.value = Math.ceil(total);
+        bookingAmountDisplay.innerText = `₹${Math.ceil(total)}`;
       } else {
         rentalDays.value = '';
+        bookingAmount.value = '';
+        bookingAmountDisplay.innerText = '₹0';
       }
     }
   }
 
-  pickupDate.addEventListener('change', calculateDays);
-  dropoffDate.addEventListener('change', calculateDays);
+  pickupDate.addEventListener('change', calculateDuration);
+  dropoffDate.addEventListener('change', calculateDuration);
 </script>
 
 </body>

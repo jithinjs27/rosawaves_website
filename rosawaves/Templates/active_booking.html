@@ -62,21 +62,20 @@
                     {% for booking in active_bookings %}
                     <tr>
                         <td>{{ booking.full_name }}</td>
-                        <td>{{ booking.pickup_date }}</td>
-                        <td>{{ booking.dropoff_date }}</td>
+                        <td>{{ booking.pickup_date|date:"d M Y H:i" }}</td>
+                        <td>{{ booking.dropoff_date|date:"d M Y H:i" }}</td>
                         <td>{{ booking.license_number }}</td>
-<td>
-    <!-- Edit Button -->
-    <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ booking.id }}">
-        <i class="fas fa-edit me-1"></i> Edit
-    </button>
+                        <td>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ booking.id }}">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
 
-    <!-- Generate Bill Button -->
-    <a href="{% url 'generate_bill' booking.id %}" class="btn btn-sm btn-success">
-        <i class="fas fa-file-invoice-dollar me-1"></i> Generate Bill
-    </a>
-</td>
-
+                            <!-- Generate Bill Button -->
+                            <a href="{% url 'generate_bill' booking.id %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-file-invoice-dollar me-1"></i> Generate Bill
+                            </a>
+                        </td>
                     </tr>
 
                     <!-- Modal for Editing Booking -->
@@ -109,23 +108,23 @@
                                       <input type="text" name="bike_model" value="{{ booking.bike_model }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
-                                      <label class="form-label">Pickup Date</label>
-                                      <input type="date" name="pickup_date" value="{{ booking.pickup_date }}" class="form-control">
+                                      <label class="form-label">Pickup Date & Time</label>
+                                      <input type="datetime-local" name="pickup_date" value="{{ booking.pickup_date|date:'Y-m-d\\TH:i' }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
-                                      <label class="form-label">Dropoff Date</label>
-                                      <input type="date" name="dropoff_date" value="{{ booking.dropoff_date }}" class="form-control">
+                                      <label class="form-label">Dropoff Date & Time</label>
+                                      <input type="datetime-local" name="dropoff_date" value="{{ booking.dropoff_date|date:'Y-m-d\\TH:i' }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
                                       <label class="form-label">License Number</label>
                                       <input type="text" name="license_number" value="{{ booking.license_number }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
-                                      <label class="form-label">Deposit amount</label>
+                                      <label class="form-label">Deposit Amount</label>
                                       <input type="text" name="deposit_amount" value="{{ booking.deposit_amount }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
-                                      <label class="form-label">Advance amount</label>
+                                      <label class="form-label">Advance Amount</label>
                                       <input type="text" name="advance_amount" value="{{ booking.advance_amount }}" class="form-control">
                                   </div>
                               </div>

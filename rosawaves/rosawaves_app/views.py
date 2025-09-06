@@ -22,7 +22,7 @@ def bike_rental_view(request):
         email = request.POST['email']
         phone = request.POST['phone']
         bike_id = request.POST['bike_model']   # this is a number
-        rental_days = request.POST['rental_days']
+        rental_days = request.POST.get('rental_days', '')
         pickup_date = request.POST['pickup_date']
         dropoff_date = request.POST['dropoff_date']
         rider_pic = request.FILES['rider_pic']

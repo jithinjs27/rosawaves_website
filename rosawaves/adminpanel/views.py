@@ -1,6 +1,7 @@
+
 from django.http import HttpResponse
 from django.shortcuts import render
-from datetime import date
+from datetime import date, datetime
 from rosawaves_app.models import BikeRental
 # Create your views here.
 from django.shortcuts import render
@@ -11,14 +12,19 @@ def admin_dashboard(request):
     pending_requests = BikeRental.objects.filter(status="pending")
     return render(request, "index_admin_page_home.html", {"pending_requests": pending_requests})
 
-
 def active_bookings_function(request):
-    today = date.today()
-    active_bookings = BikeRental.objects.filter(pickup_date__lte=today, dropoff_date__gte=today,status="approved")
+    now = datetime.now()  # Current date and time
+
+    active_bookings = BikeRental.objects.filter(
+        pickup_date__lte=now,
+        dropoff_date__gte=now,
+        status="approved"
+    )
+
     return render(request, "active_booking.html", {"active_bookings": active_bookings})
 def return_due_function(request):
-    today = date.today()
-    return_due_bookings = BikeRental.objects.filter(dropoff_date__lte=today)
+    now = datetime.now()  # current date and time
+    return_due_bookings = BikeRental.objects.filter(dropoff_date__lte=now)
     return render(request, "Return_due.html", {"return_due_bookings": return_due_bookings})
 
 
