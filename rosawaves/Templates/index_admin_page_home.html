@@ -5,6 +5,7 @@
   <title>ROSAWAVES Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <style>
     body {
       background-color: #f5f8fa;
@@ -29,11 +30,6 @@
       border: none;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .stat-icon {
-      font-size: 24px;
-      margin-right: 8px;
     }
 
     .status-dot {
@@ -61,21 +57,6 @@
       gap: 1rem;
     }
 
-    .notification {
-      position: relative;
-    }
-
-    .notification-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #00c18b;
-      color: white;
-      border-radius: 50%;
-      font-size: 10px;
-      padding: 3px 6px;
-    }
-
     /* Resize modal images */
     .modal-img {
       max-width: 200px;
@@ -101,10 +82,6 @@
     <div class="top-bar mb-4">
       <i class="bi bi-brightness-high"></i>
       <i class="bi bi-gear"></i>
-<!--      <div class="notification">-->
-<!--        <i class="bi bi-bell"></i>-->
-<!--        <span class="notification-badge">3</span>-->
-<!--      </div>-->
       <i class="bi bi-person"></i>
     </div>
 
@@ -125,9 +102,33 @@
         </a>
       </div>
       <div class="col-md-4">
-        <a href="/deposit_pending" class="text-decoration-none">
+        <a href="/deposit-pending" class="text-decoration-none">
           <div class="card p-4 text-center">
             <h6>Deposit Payment</h6>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <a href="/offers" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>Offers</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/return_due_bookings" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>Vehicles</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/deposit-pending" class="text-decoration-none">
+          <div class="card p-4 text-center">
+            <h6>All Data</h6>
           </div>
         </a>
       </div>
@@ -167,35 +168,74 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="detailsModalLabel{{ request.id }}">Booking Details - {{ request.full_name }}</h5>
+              <h5 class="modal-title" id="detailsModalLabel{{ request.id }}">
+                Booking Details - {{ request.full_name }}
+              </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <p><strong>Name:</strong> {{ request.full_name }}</p>
-              <p><strong>Email:</strong> {{ request.email }}</p>
-              <p><strong>Phone:</strong> {{ request.phone }}</p>
-              <p><strong>License Number:</strong> {{ request.license_number }}</p>
-              <p><strong>Pickup Date:</strong> {{ request.pickup_date }}</p>
-              <p><strong>Dropoff Date:</strong> {{ request.dropoff_date }}</p>
-              <p><strong>Bike Model:</strong> {{ request.bike_model }}</p>
-              <p><strong>Rental Days:</strong> {{ request.rental_days }}</p>
-              <p><strong>Status:</strong> {{ request.status }}</p>
 
+              <!-- Booking Info -->
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Name:</strong> {{ request.full_name }}</p>
+                  <p><strong>Email:</strong> {{ request.email }}</p>
+                  <p><strong>Phone:</strong> {{ request.phone }}</p>
+                  <p><strong>License Number:</strong> {{ request.license_number }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Bike Model:</strong> {{ request.bike_model }}</p>
+                  <p><strong>Rental Days:</strong> {{ request.rental_days }}</p>
+                  <p><strong>Pickup Date:</strong> {{ request.pickup_date }}</p>
+                  <p><strong>Dropoff Date:</strong> {{ request.dropoff_date }}</p>
+                  <p><strong>Status:</strong> {{ request.status }}</p>
+                </div>
+              </div>
+
+              <hr>
+
+              <!-- Uploaded Documents -->
               <h6 class="mt-3">Uploaded Documents</h6>
+              <div class="row">
+                <!-- Rider Picture -->
+                {% if request.rider_pic %}
+                <div class="col-md-4 text-center">
+                  <p><strong>Rider Picture</strong></p>
+                  <img src="{{ request.rider_pic.url }}" class="modal-img" alt="Rider Picture">
+                </div>
+                {% endif %}
 
-              <!-- Rider Picture -->
-              {% if request.rider_pic %}
-                <p><strong>Rider Picture:</strong></p>
-                <img src="{{ request.rider_pic.url }}" class="modal-img" alt="Rider Picture">
-              {% endif %}
+                <!-- Aadhar -->
+                {% if request.aadhar_upload %}
+                <div class="col-md-4 text-center">
+                  <p><strong>Aadhar</strong></p>
+                  <a href="{{ request.aadhar_upload.url }}" target="_blank" class="btn btn-sm btn-primary">
+                    View Document
+                  </a>
+                </div>
+                {% endif %}
 
-              <!-- Aadhar Upload -->
-              {% if request.aadhar_upload %}
-                <p><strong>Documents:</strong></p>
-                <a href="{{ request.aadhar_upload.url }}" target="_blank" class="btn btn-sm btn-primary">
-                  View Document
-                </a>
-              {% endif %}
+                <!-- Passport -->
+                {% if request.passport_upload %}
+                <div class="col-md-4 text-center">
+                  <p><strong>Passport</strong></p>
+                  <a href="{{ request.passport_upload.url }}" target="_blank" class="btn btn-sm btn-primary">
+                    View Document
+                  </a>
+                </div>
+                {% endif %}
+
+                <!-- Hotel Booking -->
+                {% if request.hotel_upload %}
+                <div class="col-md-4 text-center mt-3">
+                  <p><strong>Hotel Booking</strong></p>
+                  <a href="{{ request.hotel_upload.url }}" target="_blank" class="btn btn-sm btn-primary">
+                    View Document
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+
             </div>
           </div>
         </div>
@@ -209,7 +249,5 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </body>
 </html>

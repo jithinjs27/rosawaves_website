@@ -13,9 +13,12 @@ class BikeRental(models.Model):
     rider_pic = models.ImageField(upload_to='riders/')
     license_number = models.CharField(max_length=50)
     aadhar_upload = models.FileField(upload_to='aadhar_docs/')
+    passport_upload = models.FileField(upload_to='passport_docs/', blank=True, null=True)
+    hotel_upload = models.FileField(upload_to='hotel_docs/', blank=True, null=True)
     status=models.CharField(max_length=50,default="pending")
     deposit_amount=models.PositiveIntegerField(default=0)
     total_bill_amount=models.PositiveIntegerField(default=0)
     advance_amount=models.PositiveIntegerField(default=0)
-    remarks=models.PositiveIntegerField(default=0)
+    remarks=models.CharField(max_length=50,default="none")
+    Name_of_staff=models.CharField(max_length=50,default="none")
 

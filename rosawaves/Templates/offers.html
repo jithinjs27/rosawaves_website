@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offer Upload Dashboard</title>
+
+  <style>
+    /* ========== RESET & BASE STYLES ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #6C63FF, #4A47A3);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #333;
+    }
+
+    /* ========== DASHBOARD CARD ========== */
+    .dashboard {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .dashboard h2 {
+      text-align: center;
+      font-weight: 700;
+      color: #4A47A3;
+      margin-bottom: 25px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ========== UPLOAD SECTION ========== */
+    .upload-section {
+      border: 2px dashed #6c63ff;
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      background-color: #f7f8ff;
+      transition: all 0.3s ease;
+    }
+
+    .upload-section:hover {
+      background-color: #ebe9ff;
+      transform: scale(1.02);
+    }
+
+    .upload-section p {
+      color: #6c63ff;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .upload-section input[type="file"] {
+      display: none;
+    }
+
+    .preview {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .preview img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    /* ========== DESCRIPTION ========== */
+    .description {
+      margin-top: 20px;
+    }
+
+    .description textarea {
+      width: 100%;
+      height: 100px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      resize: none;
+      outline: none;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .description textarea:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 5px rgba(108, 99, 255, 0.4);
+    }
+
+    /* ========== BUTTON ========== */
+    .upload-btn {
+      width: 100%;
+      background: linear-gradient(90deg, #6c63ff, #4a47a3);
+      border: none;
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(108, 99, 255, 0.4);
+    }
+
+    /* ========== MESSAGE STYLES ========== */
+    .message {
+      text-align: center;
+      font-weight: 500;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .message.success {
+      background: #e6ffed;
+      color: #2e7d32;
+      border: 1px solid #b2fab4;
+    }
+
+    .message.error {
+      background: #ffe6e6;
+      color: #c62828;
+      border: 1px solid #ffb2b2;
+    }
+
+    /* ========== OFFERS LIST ========== */
+    .offers-list {
+      margin-top: 35px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .offers-list h3 {
+      text-align: center;
+      color: #4A47A3;
+      margin-bottom: 20px;
+    }
+
+    .offer-item {
+      background: #f9f9ff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .offer-item:hover {
+      transform: scale(1.02);
+      background-color: #f0f0ff;
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+    }
+
+    .offer-item img {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .offer-item p {
+      flex: 1;
+      color: #333;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .delete-btn {
+      background: linear-gradient(90deg, #ff4b5c, #d32f2f);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #d32f2f, #b71c1c);
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 500px) {
+      .dashboard {
+        padding: 20px;
+      }
+      .offer-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      .offer-item img {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard">
+    <h2>🎁 Upload a New Offer</h2>
+
+    {% if success %}
+      <p class="message success">Offer uploaded successfully!</p>
+    {% elif error %}
+      <p class="message error">{{ error }}</p>
+    {% endif %}
+
+    <form id="offerForm" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label class="upload-section" for="offerImage">
+        <input type="file" id="offerImage" name="offerImage" accept="image/*" required />
+        <p>📤 Click or drag an image here to upload</p>
+      </label>
+
+      <div class="preview" id="imagePreview"></div>
+
+      <div class="description">
+        <textarea id="offerDescription" name="offerDescription" placeholder="📝 Write a short description about your offer..." required></textarea>
+      </div>
+
+      <button type="submit" class="upload-btn">✨ Upload Offer</button>
+    </form>
+
+    <!-- Show current offers -->
+    <div class="offers-list">
+      <h3>📜 Current Offers</h3>
+
+      {% if offers %}
+        {% for offer in offers %}
+          <div class="offer-item">
+            <img src="{{ offer.offer_image.url }}" alt="Offer Image">
+            <p>{{ offer.description }}</p>
+            <form method="POST" style="margin:0;">
+              {% csrf_token %}
+              <input type="hidden" name="delete_offer" value="{{ offer.id }}">
+              <button type="submit" class="delete-btn">🗑 Delete</button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p style="text-align:center; color:#777; margin-top:10px;">No offers uploaded yet 🚫</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('offerImage');
+    const preview = document.getElementById('imagePreview');
+
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          preview.innerHTML = `<img src="${reader.result}" alt="Offer Preview">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = '';
+      }
+    });
+  </script>
+</body>
+</html>

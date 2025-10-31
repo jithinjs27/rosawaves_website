@@ -1,77 +1,88 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from .forms import BikeRentalForm
-from adminpanel.models import BikeModel
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import BikeRental
-
-# Create your views here.
+from adminpanel.models import BikeModel
+from adminpanel.models import offers
+from django.http import HttpResponse
 
 def user_home_page(request):
-    return render(request,"index_user_home_page.html")
+    offer=offers.objects.all()
+    return render(request, "index_user_home_page.html",{"offers": offer})
+
+
 def user_bike_rental(request):
     bikes = BikeModel.objects.all()
-    return render(request,"Bike_rental_user_form.html",{"bikes": bikes})
+    return render(request, "Bike_rental_user_form.html", {"bikes": bikes})
 
 
 def bike_rental_view(request):
     if request.method == 'POST':
-        full_name = request.POST['full_name']
-        email = request.POST['email']
-        phone = request.POST['phone']
-        bike_id = request.POST['bike_model']   # this is a number
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        bike_id = request.POST.get('bike_model')  # this is a number
         rental_days = request.POST.get('rental_days', '')
-        pickup_date = request.POST['pickup_date']
-        dropoff_date = request.POST['dropoff_date']
-        rider_pic = request.FILES['rider_pic']
-        license_number = request.POST['license_number']
-        aadhar_upload = request.FILES['aadhar_upload']
+        pickup_date = request.POST.get('pickup_date')
+        dropoff_date = request.POST.get('dropoff_date')
+        rider_pic = request.FILES.get('rider_pic')
+        license_number = request.POST.get('license_number')
 
-        # Fetch the actual Bike object
+        # File uploads
+        aadhar_upload = request.FILES.get('aadhar_upload', None)
+        passport_upload = request.FILES.get('passport_upload', None)
+        hotel_upload = request.FILES.get('hotel_upload', None)
+
+        # Fetch actual bike
         bike = BikeModel.objects.get(id=bike_id)
 
-        # Save to the database
+        # Save booking
         BikeRental.objects.create(
             full_name=full_name,
             email=email,
             phone=phone,
-            bike_model=bike,   # 👈 save the Bike object, not just ID
+            bike_model=bike.name,  # storing name (your model uses CharField)
             rental_days=rental_days,
             pickup_date=pickup_date,
             dropoff_date=dropoff_date,
             rider_pic=rider_pic,
             license_number=license_number,
-            aadhar_upload=aadhar_upload
+            aadhar_upload=aadhar_upload,
+            # If you add these fields in model later:
+            passport_upload=passport_upload,
+            hotel_upload=hotel_upload,
         )
         return redirect('success_page')
 
-    return render(request, 'Bike_rental_user_form.html')
+    bikes = BikeModel.objects.all()
+    return render(request, 'Bike_rental_user_form.html', {"bikes": bikes})
+
 
 def success_view(request):
     return render(request, 'success.html')
 
+
 def contact_view(request):
-    return render(request,"User_contact_page.html")
+    return render(request, "User_contact_page.html")
+
+
 def booking_status_view(request):
-    return render(request,"booking_status.html")
+    return render(request, "booking_status.html")
+
 
 def booking_status(request):
-    query = request.GET.get("q", "")  # Get search input
+    query = request.GET.get("q", "")
     bookings = []
 
     if query:
         bookings = BikeRental.objects.filter(
             email__icontains=query
-        ) | BikeRental.objects.filter(id__icontains=query)  # adjust if booking ID field is different
+        ) | BikeRental.objects.filter(id__icontains=query)
 
     return render(request, "booking_status.html", {"bookings": bookings, "query": query})
+
 
 def payment_page(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     return render(request, "payment.html", {"booking": booking})
 
-
-
-
+def booking_options(request):
+    return render(request,"Booking_option_page.html")

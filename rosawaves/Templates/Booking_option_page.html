@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rosawaves Online Booking</title>
+
+  <!-- Ionicons for menu icons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+  <style>
+    /* RESET + GENERAL */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #6dd5fa, #2980b9);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* HEADER STYLING */
+    .header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+    }
+
+    .header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* NAVIGATION */
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .navbar-list {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .navbar-link {
+      color: #fff;
+      transition: color 0.3s;
+    }
+
+    .navbar-link:hover {
+      color: #ffd700;
+    }
+
+    .btn {
+      background: #fff;
+      color: #2980b9;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: #ffd700;
+      color: #fff;
+    }
+
+    /* MOBILE MENU TOGGLE */
+    .nav-toggle-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: none;
+    }
+
+    .nav-toggle-btn ion-icon.close {
+      display: none;
+    }
+
+    /* MAIN SECTION */
+    .main-content {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .option-card {
+      background-color: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      font-size: 1.3rem;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      min-width: 150px;
+    }
+
+    .option-card:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-toggle-btn {
+        display: block;
+      }
+
+      .navbar {
+        position: absolute;
+        top: 70px;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        width: 200px;
+        display: none;
+      }
+
+      .navbar.active {
+        display: flex;
+      }
+
+      .navbar-list {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .options {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .option-card {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header" data-header>
+    <div class="container">
+      <a href="#"><h1 class="logo">Rosawaves</h1></a>
+
+      <button aria-label="Toggle Menu" class="nav-toggle-btn" data-nav-toggle-btn>
+        <ion-icon class="open" name="menu-outline"></ion-icon>
+        <ion-icon class="close" name="close-outline"></ion-icon>
+      </button>
+
+      <nav class="navbar" data-navbar>
+        <ul class="navbar-list">
+          <li><a class="navbar-link" href="/">Home</a></li>
+          <li><a class="navbar-link" href="success/booking_status/">Booking Status</a></li>
+          <li><a class="navbar-link" href="#">Offers</a></li>
+          <li><a class="navbar-link" href="#">Destinations</a></li>
+          <li><a class="navbar-link" href="/contact">Contact Us</a></li>
+        </ul>
+        <a class="btn btn-secondary" href="/booking_options">Booking Now</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container">
+      <h1 class="title">Online Booking</h1>
+      <div class="options">
+        <a href="" class="option-card">🚖 Taxi</a>
+        <a href="" class="option-card">🏨 Hotel</a>
+        <a href="/user-bike-rental" class="option-card">🏍️ Two Wheeler</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- TOGGLE SCRIPT -->
+  <script>
+    const navToggleBtn = document.querySelector('[data-nav-toggle-btn]');
+    const navbar = document.querySelector('.navbar');
+    const openIcon = navToggleBtn.querySelector('.open');
+    const closeIcon = navToggleBtn.querySelector('.close');
+
+    navToggleBtn.addEventListener('click', () => {
+      navbar.classList.toggle('active');
+      openIcon.style.display = navbar.classList.contains('active') ? 'none' : 'inline';
+      closeIcon.style.display = navbar.classList.contains('active') ? 'inline' : 'none';
+    });
+  </script>
+
+</body>
+</html>

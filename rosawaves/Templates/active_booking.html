@@ -53,7 +53,7 @@
                     <tr>
                         <th>Full Name</th>
                         <th>Pickup Date</th>
-                        <th>Dropoff Date</th>
+                        <th>Return Date</th>
                         <th>ID Number</th>
                         <th>Actions</th>
                     </tr>
@@ -68,7 +68,7 @@
                         <td>
                             <!-- Edit Button -->
                             <button type="button" class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ booking.id }}">
-                                <i class="fas fa-edit me-1"></i> Edit
+                                <i class="fas fa-edit me-1"></i> Update
                             </button>
 
                             <!-- Generate Bill Button -->
@@ -112,7 +112,7 @@
                                       <input type="datetime-local" name="pickup_date" value="{{ booking.pickup_date|date:'Y-m-d\\TH:i' }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
-                                      <label class="form-label">Dropoff Date & Time</label>
+                                      <label class="form-label">Return Date & Time</label>
                                       <input type="datetime-local" name="dropoff_date" value="{{ booking.dropoff_date|date:'Y-m-d\\TH:i' }}" class="form-control">
                                   </div>
                                   <div class="col-md-6">
@@ -126,6 +126,14 @@
                                   <div class="col-md-6">
                                       <label class="form-label">Advance Amount</label>
                                       <input type="text" name="advance_amount" value="{{ booking.advance_amount }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Helmet number 1</label>
+                                      <input type="text" name="helmet_number_1" value="{{ booking.helmet_number_1 }}" class="form-control">
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label class="form-label">Helmet number 2</label>
+                                      <input type="text" name="helmet_number_2" value="{{ booking.helmet_number_2 }}" class="form-control">
                                   </div>
                               </div>
                             </div>
