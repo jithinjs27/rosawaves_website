@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 
-from rosawaves_app.models import BikeRental
+from rosawaves_app.models import BikeRental,BikeModel
 from .models import offers
 
 
@@ -168,4 +168,21 @@ def offers_fun(request):
     # Show current offers
     all_offers = offers.objects.all()
     return render(request, 'offers.html', {'offers': all_offers})
+
+
+def vehicle_create(request):
+    if request.method == "POST":
+        BikeModel.objects.create(
+            name=request.POST.get("name"),
+            Vehicle_number=request.POST.get("Vehicle_number"),
+            mileage=request.POST.get("mileage"),
+            rent_per_day=request.POST.get("rent_per_day"),
+            Onwer_name=request.POST.get("Onwer_name"),
+            Status=request.POST.get("Status")
+        )
+        return redirect("vehicle_create")  # come back to same page
+
+    vehicles = BikeModel.objects.all()
+    return render(request, "Vehicle_detailes.html", {"vehicle": vehicles})
+
 

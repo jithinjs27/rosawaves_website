@@ -19,3 +19,5 @@ class BookingForm(forms.ModelForm):
             'dropoff_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
+
+

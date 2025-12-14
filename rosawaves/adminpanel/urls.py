@@ -13,4 +13,5 @@ urlpatterns = [
     path("return/<int:booking_id>/", views.process_return, name="process_return"),
     path("generate-bill/<int:booking_id>/", views.generate_bill, name="generate_bill"),
     path('offers/', views.offers_fun, name='offers'),
+    path("vehicle_details/", views.vehicle_create, name="vehicle_create"),
 ]

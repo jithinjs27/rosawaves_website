@@ -6,8 +6,6 @@
   <title>Bike Rental Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
@@ -29,143 +27,218 @@
       text-align: center;
       color: #2c3e50;
     }
+    #mainFormSection {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <form class="form-container needs-validation" id="bikeRentalForm" method="POST" action="{% url 'bike_rental_submit' %}" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-        <div class="form-title">Bike Rental Form</div>
+<!-- Guidelines Modal -->
+<div class="modal fade" id="guidelinesModal" tabindex="-1" aria-labelledby="guidelinesLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-primary">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="guidelinesLabel">Bike Rental Guidelines & Company Policies</h5>
+      </div>
+      <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+        <p class="fw-semibold">Please read and agree to all terms and policies before continuing:</p>
 
-        <div id="alertMsg" class="alert alert-danger d-none" role="alert">
-          Please fill in all required fields before submitting.
+        <!-- General Guidelines -->
+        <h5 class="text-primary mt-3">1. General Guidelines</h5>
+        <ul>
+          <li>The renter must present a valid driver’s license before bike handover.</li>
+          <li>The renter is fully responsible for any damage, loss, or fines incurred during the rental period.</li>
+          <li>Helmets are mandatory at all times while riding.</li>
+          <li>Bikes must be returned with the same fuel level as received.</li>
+          <li>Late returns will incur extra charges based on hourly rent.</li>
+          <li>In case of accident or damage, the renter must inform us immediately.</li>
+          <li>No refunds for early returns or cancellations after pickup.</li>
+        </ul>
+
+        <!-- Customer Verification -->
+        <h5 class="text-primary mt-4">2. Customer Verification & Documentation</h5>
+        <ul>
+          <li>Customer must provide an <strong>original driving license</strong> (two-wheeler license mandatory).</li>
+          <li>A copy of <strong>Aadhaar / Passport / other ID proof</strong> must be collected.</li>
+          <li>Customer’s <strong>mobile number</strong> and <strong>emergency contact</strong> must be verified.</li>
+          <li>A <strong>rental agreement form</strong> must be filled and signed before handing over the keys.</li>
+        </ul>
+
+        <!-- Rental Policy -->
+        <h5 class="text-primary mt-4">3. Rental Policy & Payment</h5>
+        <ul>
+          <li><strong>Minimum rental duration:</strong> 4 hours.</li>
+          <li><strong>Full payment</strong> must be collected in advance.</li>
+          <li><strong>Security deposit:</strong> ₹1000 (varies by vehicle), refundable within 10 days.</li>
+          <li><strong>Fuel</strong> is not included unless specified.</li>
+          <li><strong>Late return charges</strong> apply after a 15-minute grace period.</li>
+          <li><strong>No partial refund</strong> for early returns.</li>
+        </ul>
+
+        <!-- Damage, Theft, and Accident Policy -->
+        <h5 class="text-primary mt-4">4. Damage, Theft & Accident Policy</h5>
+        <ul>
+          <li>The customer is fully responsible for any <strong>damage, loss, or theft</strong> during the rental period.</li>
+          <li>In case of an accident:
+            <ul>
+              <li>Inform <strong>Rosa Waves</strong> immediately.</li>
+              <li>A <strong>police complaint</strong> must be filed.</li>
+              <li>Repair costs will be charged as per <strong>service invoice</strong>.</li>
+            </ul>
+          </li>
+          <li><strong>Insurance claim procedures</strong> (if applicable) must be followed strictly.</li>
+        </ul>
+
+        <hr>
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="agreeTerms">
+          <label class="form-check-label fw-semibold" for="agreeTerms">
+            I have read and agree to all terms and policies stated above.
+          </label>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="agreeBtn" class="btn btn-success" disabled>I Agree & Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- Full Name -->
-        <div class="mb-3">
-          <label class="form-label">Full Name *</label>
-          <input type="text" name="full_name" class="form-control" required>
-        </div>
+<!-- Main Form Section -->
+<div id="mainFormSection">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <form class="form-container needs-validation" id="bikeRentalForm" method="POST" action="{% url 'bike_rental_submit' %}" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          <div class="form-title">Bike Rental Form</div>
 
-        <!-- Email -->
-        <div class="mb-3">
-          <label class="form-label">Email Address *</label>
-          <input type="email" name="email" class="form-control" required>
-        </div>
-
-        <!-- Phone -->
-        <div class="mb-3">
-          <label class="form-label">Phone Number *</label>
-          <input type="tel" name="phone" class="form-control" required>
-        </div>
-
-        <!-- Bike Selection -->
-        <div class="mb-3">
-          <label class="form-label">Select Bike Model *</label>
-          <div class="input-group">
-            <select class="form-select" name="bike_model" id="bikeModel" required>
-              <option value="" disabled selected>Choose a bike</option>
-              {% for bike in bikes %}
-                <option value="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}">{{ bike.name }}</option>
-              {% endfor %}
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
-              View Bikes
-            </button>
+          <div id="alertMsg" class="alert alert-danger d-none" role="alert">
+            Please fill in all required fields before submitting.
           </div>
-        </div>
 
-        <!-- Rental Duration -->
-        <div class="mb-3">
-          <label class="form-label">Rental Duration *</label>
-          <input type="text" class="form-control" id="rentalDaysDisplay" readonly>
-          <input type="hidden" name="rental_days" id="rentalDays">
-        </div>
+          <!-- Full Name -->
+          <div class="mb-3">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="full_name" class="form-control" required>
+          </div>
 
-        <!-- Pickup Date -->
-        <div class="mb-3">
-          <label class="form-label">Booking Start (Date & Time) *</label>
-          <input type="text" name="pickup_date" class="form-control datetimepicker" id="pickupDate" required>
-        </div>
+          <!-- Email -->
+          <div class="mb-3">
+            <label class="form-label">Email Address *</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
 
-        <!-- Dropoff Date -->
-        <div class="mb-3">
-          <label class="form-label">Booking End (Date & Time) *</label>
-          <input type="text" name="dropoff_date" class="form-control datetimepicker" id="dropoffDate" required>
-        </div>
+          <!-- Phone -->
+          <div class="mb-3">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" name="phone" class="form-control" required>
+          </div>
 
-        <!-- Rider Picture -->
-        <div class="mb-3">
-          <label class="form-label">Upload Rider Picture *</label>
-          <input type="file" name="rider_pic" class="form-control" accept="image/*" required>
-        </div>
+          <!-- Bike Selection -->
+          <div class="mb-3">
+            <label class="form-label">Select Bike Model *</label>
+            <div class="input-group">
+              <select class="form-select" name="bike_model" id="bikeModel" required>
+                <option value="" disabled selected>Choose a bike</option>
+                {% for bike in bikes %}
+                  <option value="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}">{{ bike.name }}</option>
+                {% endfor %}
+              </select>
+              <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
+                View Bikes
+              </button>
+            </div>
+          </div>
 
-        <!-- License Number -->
-        <div class="mb-3">
-          <label class="form-label">License Number *</label>
-          <input type="text" name="license_number" class="form-control" required>
-        </div>
+          <!-- Rental Duration -->
+          <div class="mb-3">
+            <label class="form-label">Rental Duration *</label>
+            <input type="text" class="form-control" id="rentalDaysDisplay" readonly>
+            <input type="hidden" name="rental_days" id="rentalDays">
+          </div>
 
-        <!-- Foreigner -->
-        <div class="mb-3">
-          <label class="form-label">Are you a foreigner? *</label>
-          <select name="is_foreigner" class="form-select" id="isForeigner" required>
-            <option value="" disabled selected>Choose an option</option>
-            <option value="no">No (Indian)</option>
-            <option value="yes">Yes (Foreigner)</option>
-          </select>
-        </div>
+          <!-- Pickup Date -->
+          <div class="mb-3">
+            <label class="form-label">Booking Start (Date & Time) *</label>
+            <input type="text" name="pickup_date" class="form-control datetimepicker" id="pickupDate" required>
+          </div>
 
-        <!-- Aadhaar (Indians only) -->
-        <div class="mb-3 d-none" id="aadharField">
-          <label class="form-label">Upload Aadhar Card / Other ID Proof *</label>
-          <input type="file" name="aadhar_upload" class="form-control" id="aadharUpload" accept=".jpg,.jpeg,.png,.pdf">
-        </div>
+          <!-- Dropoff Date -->
+          <div class="mb-3">
+            <label class="form-label">Booking End (Date & Time) *</label>
+            <input type="text" name="dropoff_date" class="form-control datetimepicker" id="dropoffDate" required>
+          </div>
 
-        <!-- Passport (Foreigners only) -->
-        <div class="mb-3 d-none" id="passportField">
-          <label class="form-label">Upload Passport *</label>
-          <input type="file" name="passport_upload" class="form-control" id="passportUpload" accept=".jpg,.jpeg,.png,.pdf">
-        </div>
+          <!-- Rider Picture -->
+          <div class="mb-3">
+            <label class="form-label">Upload Rider Picture *</label>
+            <input type="file" name="rider_pic" class="form-control" accept="image/*" required>
+          </div>
 
-        <!-- Stay in Varkala -->
-        <div class="mb-3">
-          <label class="form-label">Are you staying in Varkala? *</label>
-          <select name="stay_varkala" class="form-select" id="stayVarkala" required>
-            <option value="" disabled selected>Choose an option</option>
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
-        </div>
+          <!-- License Number -->
+          <div class="mb-3">
+            <label class="form-label">License Number *</label>
+            <input type="text" name="license_number" class="form-control" required>
+          </div>
 
-        <!-- Hotel Booking Upload -->
-        <div class="mb-3 d-none" id="hotelField">
-          <label class="form-label">Upload Hotel Booking Confirmation *</label>
-          <input type="file" name="hotel_upload" class="form-control" id="hotelUpload" accept=".jpg,.jpeg,.png,.pdf">
-        </div>
+          <!-- Foreigner -->
+          <div class="mb-3">
+            <label class="form-label">Are you a foreigner? *</label>
+            <select name="is_foreigner" class="form-select" id="isForeigner" required>
+              <option value="" disabled selected>Choose an option</option>
+              <option value="no">No (Indian)</option>
+              <option value="yes">Yes (Foreigner)</option>
+            </select>
+          </div>
 
-        <!-- Remarks -->
-        <div class="mb-3">
-          <label class="form-label">Remarks (Optional)</label>
-          <input type="text" name="remarks" class="form-control">
-        </div>
+          <!-- Aadhaar -->
+          <div class="mb-3 d-none" id="aadharField">
+            <label class="form-label">Upload Aadhar Card / Other ID Proof *</label>
+            <input type="file" name="aadhar_upload" class="form-control" id="aadharUpload" accept=".jpg,.jpeg,.png,.pdf">
+          </div>
 
-        <!-- Hidden booking amount -->
-        <input type="hidden" name="total_bill_amount" id="bookingAmount">
+          <!-- Passport -->
+          <div class="mb-3 d-none" id="passportField">
+            <label class="form-label">Upload Passport *</label>
+            <input type="file" name="passport_upload" class="form-control" id="passportUpload" accept=".jpg,.jpeg,.png,.pdf">
+          </div>
 
-        <!-- Submit -->
-        <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
-      </form>
+          <!-- Stay in Varkala -->
+          <div class="mb-3">
+            <label class="form-label">Are you staying in Varkala? *</label>
+            <select name="stay_varkala" class="form-select" id="stayVarkala" required>
+              <option value="" disabled selected>Choose an option</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
 
-      <!-- Booking Summary -->
-      <div class="mt-4">
-        <div class="card shadow-lg border-success">
-          <div class="card-body text-center">
-            <h5 class="card-title text-success fw-bold">Booking Amount</h5>
-            <h2 id="bookingAmountDisplay" class="fw-bold text-success">₹0</h2>
+          <!-- Hotel Booking Upload -->
+          <div class="mb-3 d-none" id="hotelField">
+            <label class="form-label">Upload Hotel Booking Confirmation *</label>
+            <input type="file" name="hotel_upload" class="form-control" id="hotelUpload" accept=".jpg,.jpeg,.png,.pdf">
+          </div>
+
+          <!-- Remarks -->
+          <div class="mb-3">
+            <label class="form-label">Remarks (Optional)</label>
+            <input type="text" name="remarks" class="form-control">
+          </div>
+
+          <input type="hidden" name="total_bill_amount" id="bookingAmount">
+
+          <button type="submit" class="btn btn-primary w-100">Submit Rental Request</button>
+        </form>
+
+        <!-- Booking Summary -->
+        <div class="mt-4">
+          <div class="card shadow-lg border-success">
+            <div class="card-body text-center">
+              <h5 class="card-title text-success fw-bold">Booking Amount</h5>
+              <h2 id="bookingAmountDisplay" class="fw-bold text-success">₹0</h2>
+            </div>
           </div>
         </div>
       </div>
@@ -194,7 +267,7 @@
               <div class="card-body">
                 <h5 class="card-title">{{ bike.name }}</h5>
                 <p class="card-text">
-                  Vehicle number : {{ bike.mileage }}<br>
+                  Vehicle number: {{ bike.mileage }}<br>
                   Rent: ₹{{ bike.rent_per_day }}/day
                 </p>
                 <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}" data-bs-dismiss="modal">
@@ -214,6 +287,19 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const guidelinesModal = new bootstrap.Modal(document.getElementById('guidelinesModal'));
+    const agreeCheckbox = document.getElementById('agreeTerms');
+    const agreeBtn = document.getElementById('agreeBtn');
+    const mainForm = document.getElementById('mainFormSection');
+    guidelinesModal.show();
+    agreeCheckbox.addEventListener('change', () => agreeBtn.disabled = !agreeCheckbox.checked);
+    agreeBtn.addEventListener('click', () => {
+      guidelinesModal.hide();
+      mainForm.style.display = 'block';
+    });
+  });
+
   const form = document.getElementById('bikeRentalForm');
   const alertBox = document.getElementById('alertMsg');
   const bookingAmount = document.getElementById('bookingAmount');
@@ -224,7 +310,6 @@
   const dropoffDate = document.getElementById('dropoffDate');
   let selectedRent = 0;
 
-  // Validation
   form.addEventListener('submit', function(event) {
     if (!form.checkValidity()) {
       event.preventDefault();
@@ -236,7 +321,6 @@
     form.classList.add('was-validated');
   });
 
-  // Select bike
   document.querySelectorAll('.select-bike').forEach(button => {
     button.addEventListener('click', function() {
       const bikeId = this.getAttribute('data-id');
@@ -251,46 +335,41 @@
     calculateDuration();
   });
 
-  // Foreigner toggle
   const isForeignerSelect = document.getElementById('isForeigner');
   const aadharField = document.getElementById('aadharField');
   const aadharUpload = document.getElementById('aadharUpload');
   const passportField = document.getElementById('passportField');
   const passportUpload = document.getElementById('passportUpload');
-
   isForeignerSelect.addEventListener('change', function () {
     if (this.value === 'yes') {
       passportField.classList.remove('d-none');
-      passportUpload.setAttribute('required', 'required');
+      passportUpload.required = true;
       aadharField.classList.add('d-none');
-      aadharUpload.removeAttribute('required');
+      aadharUpload.required = false;
       aadharUpload.value = '';
-    } else if (this.value === 'no') {
+    } else {
       aadharField.classList.remove('d-none');
-      aadharUpload.setAttribute('required', 'required');
+      aadharUpload.required = true;
       passportField.classList.add('d-none');
-      passportUpload.removeAttribute('required');
+      passportUpload.required = false;
       passportUpload.value = '';
     }
   });
 
-  // Toggle hotel booking field
   const stayVarkala = document.getElementById('stayVarkala');
   const hotelField = document.getElementById('hotelField');
   const hotelUpload = document.getElementById('hotelUpload');
-
   stayVarkala.addEventListener('change', function () {
     if (this.value === 'yes') {
       hotelField.classList.remove('d-none');
-      hotelUpload.setAttribute('required', 'required');
+      hotelUpload.required = true;
     } else {
       hotelField.classList.add('d-none');
-      hotelUpload.removeAttribute('required');
+      hotelUpload.required = false;
       hotelUpload.value = '';
     }
   });
 
-  // Flatpickr Init
   flatpickr(".datetimepicker", {
     enableTime: true,
     time_24hr: false,
@@ -300,32 +379,21 @@
     dateFormat: "Y-m-d H:i"
   });
 
-  // Duration & Billing Logic
   function calculateDuration() {
     if (pickupDate.value && dropoffDate.value) {
       const start = new Date(pickupDate.value);
       const end = new Date(dropoffDate.value);
       const diffMs = end - start;
-
       if (diffMs > 0) {
         const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
         const days = Math.floor(diffHours / 24);
         const hours = diffHours % 24;
-
-        // Show duration
         rentalDaysDisplay.value = days > 0 ? `${days} day(s) ${hours} hour(s)` : `${hours} hour(s)`;
         rentalDaysHidden.value = rentalDaysDisplay.value;
-
-        // Billing
         let total = 0;
         if (selectedRent > 0) {
-          if (days === 0) {
-            total = selectedRent; // min 1 day
-          } else {
-            total = (days * selectedRent) + ((selectedRent / 24) * hours);
-          }
+          total = (days * selectedRent) + ((selectedRent / 24) * hours);
         }
-
         bookingAmount.value = Math.ceil(total);
         bookingAmountDisplay.innerText = `₹${Math.ceil(total)}`;
       } else {
@@ -340,6 +408,5 @@
   pickupDate.addEventListener('change', calculateDuration);
   dropoffDate.addEventListener('change', calculateDuration);
 </script>
-
 </body>
 </html>
