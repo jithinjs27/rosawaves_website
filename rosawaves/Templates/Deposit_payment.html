@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Table with Actions</title>
+    <title>Deposit Payment</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -18,156 +15,146 @@
             padding: 20px;
         }
         .table-container {
-            background-color: white;
+            background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             padding: 20px;
-            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.05);
         }
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .table-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #343a40;
-        }
-        .btn-edit {
-            color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.1);
-            border: none;
-            transition: all 0.3s;
-        }
-        .btn-edit:hover {
-            background-color: rgba(13, 110, 253, 0.2);
-        }
-        .btn-return {
-            color: #198754;
-            background-color: rgba(25, 135, 84, 0.1);
-            border: none;
-            transition: all 0.3s;
-        }
-        .btn-return:hover {
-            background-color: rgba(25, 135, 84, 0.2);
-        }
+        .on-time { color: #198754; font-weight: 600; }
+        .due-today { color: #fd7e14; font-weight: 600; }
+        .overdue { color: #dc3545; font-weight: 600; }
+
         @media (max-width: 768px) {
-            .table-responsive {
-                border: none;
-            }
-            .table thead {
-                display: none;
-            }
+            .table thead { display: none; }
             .table, .table tbody, .table tr, .table td {
-                display: block;
-                width: 100%;
+                display: block; width: 100%;
             }
             .table tr {
-                margin-bottom: 15px;
                 border: 1px solid #dee2e6;
-                border-radius: 5px;
+                margin-bottom: 15px;
                 padding: 10px;
+                border-radius: 5px;
             }
             .table td {
                 text-align: right;
                 padding-left: 50%;
                 position: relative;
-                border-bottom: 1px solid #f1f1f1;
             }
             .table td::before {
                 content: attr(data-label);
                 position: absolute;
                 left: 10px;
-                width: 40%;
-                padding-right: 10px;
                 font-weight: 600;
-                text-align: left;
-                color: #495057;
             }
         }
     </style>
 </head>
 <body>
+
 <div class="container">
     <div class="table-container">
-        <div class="table-header">
-            <h2 class="table-title">Deposit payment</h2>
-        </div>
+        <h2 class="mb-4">Deposit Payment</h2>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Booking Date</th>
-                        <th>Return Date</th>
-                        <th>ID number</th>
-                        <th>Actions</th>
-                        <th>Payment Date</th>
-                        <th>Payment Days Remaining</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for booking in deposit_pending %}
-                    <tr>
-                        <td data-label="Full Name">{{ booking.full_name }}</td>
-                        <td data-label="Pickup Date">{{ booking.pickup_date }}</td>
-                        <td data-label="Dropoff Date">{{ booking.dropoff_date }}</td>
-                        <td data-label="ID number">{{ booking.license_number }}</td>
-                        <td data-label="Actions"></td>
-                        <td data-label="Payment Date" class="payment-date" data-date="{{ booking.deposit_paymet_date }}">{{ booking.deposit_paymet_date }}</td>
-                        <td data-label="Days Remaining" class="days-remaining"></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">No bookings available.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Full Name</th>
+                    <th>Pickup</th>
+                    <th>Return</th>
+                    <th>ID No</th>
+                    <th>Phone</th>
+                    <th>Days Remaining</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in deposit_pending_bookings %}
+                <!-- MAIN ROW -->
+                <tr>
+                    <td data-label="Full Name">{{ booking.full_name }}</td>
+                    <td data-label="Pickup">{{ booking.pickup_date }}</td>
+                    <td data-label="Return"
+                        class="return-date"
+                        data-date="{{ booking.dropoff_date|date:'Y-m-d' }}">
+                        {{ booking.dropoff_date }}
+                    </td>
+                    <td data-label="ID No">{{ booking.license_number }}</td>
+                    <td data-label="Phone">{{ booking.phone }}</td>
+
+                    <td data-label="Days Remaining" class="days-remaining"></td>
+
+                    <td data-label="Details">
+                        <button class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#details-{{ forloop.counter }}">
+                            Show
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- DETAILS ROW -->
+                <tr class="collapse bg-light" id="details-{{ forloop.counter }}">
+                    <td colspan="7">
+                        <div class="p-3">
+                            <strong>Extra Details</strong>
+                            <hr class="my-2">
+                            <p><strong>Email:</strong> {{ booking.email }}</p>
+                            <p><strong>Address:</strong> {{ booking.address }}</p>
+                            <p><strong>Vehicle:</strong> {{ booking.vehicle_name }}</p>
+                            <p><strong>Deposit Amount:</strong> {{ booking.deposit_amount }}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        No bookings available
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Bootstrap Bundle -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- JavaScript to calculate and sort -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const rows = Array.from(document.querySelectorAll("tbody tr"));
+
+    const rows = document.querySelectorAll("tbody tr");
+
     const today = new Date();
+    today.setHours(0,0,0,0);
 
     rows.forEach(row => {
-        const dateCell = row.querySelector(".payment-date");
-        const remainingCell = row.querySelector(".days-remaining");
+        const returnCell = row.querySelector(".return-date");
+        const outputCell = row.querySelector(".days-remaining");
 
-        if (dateCell && remainingCell) {
-            const dateStr = dateCell.getAttribute("data-date");
-            const paymentDate = new Date(dateStr);
-            const diffTime = paymentDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (!returnCell || !outputCell) return;
 
-            remainingCell.textContent = diffDays >= 0
-                ? `${diffDays} day(s)`
-                : `Overdue by ${Math.abs(diffDays)} day(s)`;
+        const returnDate = new Date(returnCell.dataset.date);
+        returnDate.setHours(0,0,0,0);
+
+        const dueDate = new Date(returnDate);
+        dueDate.setDate(dueDate.getDate() + 60);
+
+        const diffDays = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 0) {
+            outputCell.textContent = `${diffDays} day(s)`;
+            outputCell.classList.add("on-time");
+        } else if (diffDays === 0) {
+            outputCell.textContent = "Due today";
+            outputCell.classList.add("due-today");
+        } else {
+            outputCell.textContent = `Overdue by ${Math.abs(diffDays)} day(s)`;
+            outputCell.classList.add("overdue");
         }
     });
-
-    // Sort rows by payment date
-    rows.sort((a, b) => {
-        const dateA = new Date(a.querySelector(".payment-date").getAttribute("data-date"));
-        const dateB = new Date(b.querySelector(".payment-date").getAttribute("data-date"));
-        return dateA - dateB;
-    });
-
-    // Re-append sorted rows
-    const tbody = document.querySelector("tbody");
-    rows.forEach(row => tbody.appendChild(row));
 });
 </script>
+
 </body>
 </html>
