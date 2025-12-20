@@ -175,7 +175,6 @@ def vehicle_create(request):
         BikeModel.objects.create(
             name=request.POST.get("name"),
             Vehicle_number=request.POST.get("Vehicle_number"),
-            mileage=request.POST.get("mileage"),
             rent_per_day=request.POST.get("rent_per_day"),
             Onwer_name=request.POST.get("Onwer_name"),
             Status=request.POST.get("Status")

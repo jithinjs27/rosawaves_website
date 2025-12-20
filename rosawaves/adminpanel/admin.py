@@ -6,5 +6,5 @@ from .models import BikeModel
 
 @admin.register(BikeModel)
 class BikeModelAdmin(admin.ModelAdmin):
-    list_display = ['name', 'mileage', 'rent_per_day']
-    search_fields = ['name']
+    list_display = ['name','Vehicle_number']
+    search_fields = ['Vehicle_number']

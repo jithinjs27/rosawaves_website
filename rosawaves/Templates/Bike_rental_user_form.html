@@ -261,15 +261,15 @@
           {% for bike in bikes %}
           <div class="col-md-6">
             <div class="card h-100">
-              {% if bike.image %}
-                <img src="{{ bike.image.url }}" class="card-img-top" alt="{{ bike.name }}">
+              {% if bike.bike_image %}
+                <img src="{{ bike.bike_image.url }}" class="card-img-top" alt="{{ bike.name }}">
               {% else %}
                 <img src="https://via.placeholder.com/400x250?text={{ bike.name }}" class="card-img-top" alt="{{ bike.name }}">
               {% endif %}
               <div class="card-body">
                 <h5 class="card-title">{{ bike.name }}</h5>
                 <p class="card-text">
-                  Vehicle number: {{ bike.mileage }}<br>
+                  Vehicle number: {{ bike.Vehicle_number }}<br>
                   Rent: ₹{{ bike.rent_per_day }}/day
                 </p>
                 <button type="button" class="btn btn-primary w-100 select-bike" data-id="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}" data-bs-dismiss="modal">

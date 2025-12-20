@@ -7,6 +7,7 @@ class BikeModel(models.Model):
     rent_per_day = models.PositiveIntegerField()
     Onwer_name=models.CharField(max_length=20, blank=True)
     Status=models.CharField(max_length=20, default="Free")
+    bike_image=models.FileField(upload_to='bike_pics/', blank=True, null=True)
 
     def __str__(self):
         return self.name
