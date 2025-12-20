@@ -173,6 +173,11 @@
             <input type="hidden" name="rental_days" id="rentalDays">
           </div>
 
+          <div id="minHoursError" class="text-danger fw-semibold d-none">
+  Minimum booking duration is 4 hours.
+</div>
+
+
           <!-- Rider Picture -->
           <div class="mb-3">
             <label class="form-label">Upload Rider Picture *</label>
@@ -381,31 +386,74 @@
     dateFormat: "Y-m-d H:i"
   });
 
-  function calculateDuration() {
-    if (pickupDate.value && dropoffDate.value) {
-      const start = new Date(pickupDate.value);
-      const end = new Date(dropoffDate.value);
-      const diffMs = end - start;
-      if (diffMs > 0) {
-        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
-        const days = Math.floor(diffHours / 24);
-        const hours = diffHours % 24;
-        rentalDaysDisplay.value = days > 0 ? `${days} day(s) ${hours} hour(s)` : `${hours} hour(s)`;
-        rentalDaysHidden.value = rentalDaysDisplay.value;
-        let total = 0;
-        if (selectedRent > 0) {
-          total = (days * selectedRent) + ((selectedRent / 24) * hours);
-        }
-        bookingAmount.value = Math.ceil(total);
-        bookingAmountDisplay.innerText = `₹${Math.ceil(total)}`;
-      } else {
-        rentalDaysDisplay.value = '';
+function calculateDuration() {
+  const submitBtn = document.querySelector('button[type="submit"]');
+
+  if (pickupDate.value && dropoffDate.value) {
+    const start = new Date(pickupDate.value);
+    const end = new Date(dropoffDate.value);
+    const diffMs = end - start;
+
+    if (diffMs > 0) {
+      const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+
+      // 🚫 Minimum 4 hours validation
+      if (diffHours < 4) {
+        rentalDaysDisplay.value = `${diffHours} hour(s)`;
         rentalDaysHidden.value = '';
         bookingAmount.value = '';
         bookingAmountDisplay.innerText = '₹0';
+        document.getElementById('minHoursError').classList.remove('d-none');
+        submitBtn.disabled = true;
+        return;
       }
+
+      // ✅ Valid booking
+      document.getElementById('minHoursError').classList.add('d-none');
+      submitBtn.disabled = false;
+
+      rentalDaysDisplay.value = `${diffHours} hour(s)`;
+      rentalDaysHidden.value = `${diffHours} hour(s)`;
+
+      let total = 0;
+
+      if (selectedRent > 0) {
+        const fullDays = Math.floor(diffHours / 24);
+        const remainingHours = diffHours % 24;
+
+        if (fullDays > 0) {
+          total += fullDays * selectedRent; // full day charges
+        }
+
+        if (remainingHours > 0) {
+          if (remainingHours <= 4) {
+            // Minimum half-day charge for < 4 hours
+            total += selectedRent / 2;
+          } else {
+            // Half-day + extra hours
+            total += selectedRent / 2 + (remainingHours - 4) * 50; // 50/hour extra
+          }
+        }
+      }
+
+      bookingAmount.value = Math.ceil(total);
+      bookingAmountDisplay.innerText = `₹${Math.ceil(total)}`;
+    } else {
+      resetBooking();
     }
   }
+}
+
+
+function resetBooking() {
+  const submitBtn = document.querySelector('button[type="submit"]');
+  rentalDaysDisplay.value = '';
+  rentalDaysHidden.value = '';
+  bookingAmount.value = '';
+  bookingAmountDisplay.innerText = '₹0';
+  submitBtn.disabled = true;
+  document.getElementById('minHoursError').classList.add('d-none');
+}
 
   pickupDate.addEventListener('change', calculateDuration);
   dropoffDate.addEventListener('change', calculateDuration);
