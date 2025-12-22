@@ -17,13 +17,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 @login_required(login_url='login')
 def admin_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('login')
     pending_requests = BikeRental.objects.filter(status="pending")
     return render(request, "index_admin_page_home.html", {"pending_requests": pending_requests})
 
 
 # -------------------------
 # Active Bookings
-# -------------------------
+# ----------------
+# ---------
 def active_bookings_function(request):
     now = datetime.now()
 
