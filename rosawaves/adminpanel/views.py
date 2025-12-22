@@ -6,7 +6,7 @@ from rosawaves_app.models import BikeRental, BikeModel
 from .models import offers
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
-from .models import BikeModel
+from .models import BikeModel,accessories
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError
 from .models import BikeModel
@@ -29,8 +29,9 @@ def active_bookings_function(request):
         dropoff_date__gte=now,
         status="approved"
     )
+    helmets = accessories.objects.all()
 
-    return render(request, "active_booking.html", {"active_bookings": active_bookings})
+    return render(request, "active_booking.html", {"active_bookings": active_bookings,"helmets": helmets})
 
 
 # -------------------------
@@ -84,7 +85,8 @@ def edit_booking(request, booking_id):
         booking.license_number = request.POST.get("license_number")
         booking.advance_amount = request.POST.get("advance_amount") or 0
         booking.deposit_amount = request.POST.get("deposit_amount") or 0
-
+        booking.helmet_1=request.POST.get("helmet_1")
+        booking.helmet_2=request.POST.get("helmet_2")
         booking.save()
         messages.success(request, f"Booking for {booking.full_name} has been updated.")
         return redirect("active_bookings_page")
@@ -239,5 +241,49 @@ def vehicle_delete(request, id):
     bike = get_object_or_404(BikeModel, id=id)
     bike.delete()
     return redirect("vehicle_create")
+
+
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import accessories
+
+def helmet_accessories(request):
+    helmets = accessories.objects.all()
+    edit_item = None
+
+    if request.method == "POST":
+        acc_id = request.POST.get("acc_id")
+        helmet_id = request.POST.get("helmet_id")
+        helmet_name = request.POST.get("helmet_name")
+        status = request.POST.get("status")
+
+        if acc_id:  # UPDATE
+            item = accessories.objects.get(id=acc_id)
+            item.Helmet_Id = helmet_id
+            item.Helmet_name = helmet_name
+            item.status = status
+            item.save()
+        else:  # ADD
+            accessories.objects.create(
+                Helmet_Id=helmet_id,
+                Helmet_name=helmet_name,
+                status=status
+            )
+        return redirect("helmet_accessories")
+
+    # Edit
+    if "edit" in request.GET:
+        edit_item = get_object_or_404(accessories, id=request.GET.get("edit"))
+
+    # Delete
+    if "delete" in request.GET:
+        accessories.objects.filter(id=request.GET.get("delete")).delete()
+        return redirect("helmet_accessories")
+
+    return render(request, "accessories.html", {
+        "helmets": helmets,
+        "edit_item": edit_item
+    })
+
 
 

@@ -100,7 +100,7 @@
                             <hr class="my-2">
                             <p><strong>Email:</strong> {{ booking.email }}</p>
                             <p><strong>Address:</strong> {{ booking.address }}</p>
-                            <p><strong>Vehicle:</strong> {{ booking.vehicle_name }}</p>
+                            <p><strong>Vehicle Number:</strong> {{ booking.bike_number }}</p>
                             <p><strong>Deposit Amount:</strong> {{ booking.deposit_amount }}</p>
                         </div>
                     </td>
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
         returnDate.setHours(0,0,0,0);
 
         const dueDate = new Date(returnDate);
-        dueDate.setDate(dueDate.getDate() + 60);
+        dueDate.setDate(dueDate.getDate() + 20);
 
         const diffDays = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
 

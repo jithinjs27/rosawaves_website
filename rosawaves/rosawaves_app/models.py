@@ -22,5 +22,7 @@ class BikeRental(models.Model):
     advance_amount=models.PositiveIntegerField(default=0)
     remarks=models.CharField(max_length=50,default="none")
     Name_of_staff=models.CharField(max_length=50,default="none")
+    helmet_1=models.CharField(max_length=50,default="none")
+    helmet_2=models.CharField(max_length=50,default="none")
 
 

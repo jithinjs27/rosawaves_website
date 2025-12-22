@@ -127,14 +127,33 @@
                                       <label class="form-label">Advance Amount</label>
                                       <input type="text" name="advance_amount" value="{{ booking.advance_amount }}" class="form-control">
                                   </div>
-                                  <div class="col-md-6">
-                                      <label class="form-label">Helmet number 1</label>
-                                      <input type="text" name="helmet_number_1" value="{{ booking.helmet_number_1 }}" class="form-control">
-                                  </div>
-                                  <div class="col-md-6">
-                                      <label class="form-label">Helmet number 2</label>
-                                      <input type="text" name="helmet_number_2" value="{{ booking.helmet_number_2 }}" class="form-control">
-                                  </div>
+<div class="col-md-6">
+    <label class="form-label">Helmet 1</label>
+<select name="helmet_1" id="helmet_1-{{ booking.id }}" class="form-select">
+    <option value="">-- Select Helmet --</option>
+    {% for helmet in helmets %}
+        <option value="{{ helmet.Helmet_Id }}"
+            {% if booking.helmet_1 == helmet.Helmet_Id %}selected{% endif %}>
+            {{ helmet.Helmet_Id }} - {{ helmet.Helmet_name }}
+        </option>
+    {% endfor %}
+</select>
+
+</div>
+<div class="col-md-6">
+    <label class="form-label">Helmet 2</label>
+<select name="helmet_2" id="helmet_2-{{ booking.id }}" class="form-select">
+    <option value="">-- Select Helmet --</option>
+    {% for helmet in helmets %}
+        <option value="{{ helmet.Helmet_Id }}"
+            {% if booking.helmet_2 == helmet.Helmet_Id %}selected{% endif %}>
+            {{ helmet.Helmet_Id }} - {{ helmet.Helmet_name }}
+        </option>
+    {% endfor %}
+</select>
+
+</div>
+
                               </div>
                             </div>
 
@@ -162,6 +181,46 @@
 </div>
 
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script><script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll('[id^="helmet_1-"]').forEach(function (helmet1) {
+
+        const bookingId = helmet1.id.split('-')[1];
+        const helmet2 = document.getElementById(`helmet_2-${bookingId}`);
+
+        if (!helmet2) return;
+
+        function syncHelmets() {
+            const selected1 = helmet1.value;
+            const selected2 = helmet2.value;
+
+            // Enable all options first
+            helmet1.querySelectorAll('option').forEach(opt => opt.disabled = false);
+            helmet2.querySelectorAll('option').forEach(opt => opt.disabled = false);
+
+            // Disable selected helmet in opposite dropdown
+            if (selected1) {
+                const optionInHelmet2 = helmet2.querySelector(`option[value="${selected1}"]`);
+                if (optionInHelmet2) optionInHelmet2.disabled = true;
+            }
+
+            if (selected2) {
+                const optionInHelmet1 = helmet1.querySelector(`option[value="${selected2}"]`);
+                if (optionInHelmet1) optionInHelmet1.disabled = true;
+            }
+        }
+
+        helmet1.addEventListener("change", syncHelmets);
+        helmet2.addEventListener("change", syncHelmets);
+
+        // Run once for edit modal
+        syncHelmets();
+    });
+
+});
+</script>
+
+
 </body>
 </html>

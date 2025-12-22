@@ -15,3 +15,10 @@ class BikeModel(models.Model):
 class offers(models.Model):
     offer_image=models.FileField(upload_to='offers_dir/', blank=True, null=True)
     description=models.CharField(max_length=150, blank=True)
+
+class accessories(models.Model):
+    Helmet_Id=models.CharField(max_length=150, blank=True)
+    Helmet_name=models.CharField(max_length=150, blank=True)
+    status=models.CharField(max_length=20, default="Available")
+    def __str__(self):
+        return f"{self.Helmet_Id} - {self.Helmet_name}"
