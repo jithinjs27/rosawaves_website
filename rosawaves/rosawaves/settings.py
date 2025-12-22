@@ -138,3 +138,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 RAZORPAY_KEY_ID='rzp_test_RuXNrjmTSGzq9C'
 RAZORPAY_KEY_SECRET='dmoReWrzY4H5WeJVKaxHDij3'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'admin_dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+

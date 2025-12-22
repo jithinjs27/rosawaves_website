@@ -1,18 +1,21 @@
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from rosawaves_app.models import BikeRental, BikeModel
 from .models import offers
-from django.shortcuts import render, redirect
-from django.db import IntegrityError
-from .models import BikeModel,accessories
-from django.shortcuts import render, redirect, get_object_or_404
+
 from django.db import IntegrityError
 from .models import BikeModel
+
+from django.contrib.auth import authenticate, login
+
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 # -------------------------
 # Dashboard
 # -------------------------
+from django.contrib.auth.decorators import login_required
+@login_required(login_url='login')
 def admin_dashboard(request):
     pending_requests = BikeRental.objects.filter(status="pending")
     return render(request, "index_admin_page_home.html", {"pending_requests": pending_requests})
@@ -284,6 +287,36 @@ def helmet_accessories(request):
         "helmets": helmets,
         "edit_item": edit_item
     })
+
+
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect("admin_dashboard")
+        else:
+            messages.error(request, "Invalid username or password")
+
+    return render(request, "admin_login.html")
+
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Account created successfully")
+            return redirect("login")
+    else:
+        form = UserCreationForm()
+
+    return render(request, "admin_register.html")
 
 
 
