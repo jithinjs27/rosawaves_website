@@ -7,7 +7,9 @@ from .models import offers
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
 from .models import BikeModel
-
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db import IntegrityError
+from .models import BikeModel
 # -------------------------
 # Dashboard
 # -------------------------
@@ -23,7 +25,7 @@ def active_bookings_function(request):
     now = datetime.now()
 
     active_bookings = BikeRental.objects.filter(
-        pickup_date__lte=now,
+        # pickup_date__lte=now,
         dropoff_date__gte=now,
         status="approved"
     )
@@ -109,6 +111,10 @@ def process_return(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     booking.status = "Returned"
     booking.save()
+    bike_status_update = get_object_or_404(BikeModel, Vehicle_number=booking.bike_number)
+    bike_status_update.Status = "Available"
+    bike_status_update.available_date=datetime.now()
+    bike_status_update.save()
     messages.success(request, f"Booking for {booking.full_name} has been marked as Returned.")
     return redirect("return_bookings")
 
@@ -175,31 +181,63 @@ def offers_fun(request):
 
 
 
+
+
 def vehicle_create(request):
     error = None
+    edit_vehicle = None
+
+    # EDIT MODE
+    if "edit_id" in request.GET:
+        edit_vehicle = get_object_or_404(BikeModel, id=request.GET.get("edit_id"))
 
     if request.method == "POST":
         try:
-            BikeModel.objects.create(
-                name=request.POST.get("name"),
-                Vehicle_number=request.POST.get("Vehicle_number"),
-                rent_per_day=request.POST.get("rent_per_day"),
-                Onwer_name=request.POST.get("Onwer_name"),
-                Status=request.POST.get("Status"),
-                bike_image=request.FILES.get("bike_image")
-            )
-            return redirect("vehicle_create")  # back to same page
+            vehicle_id = request.POST.get("vehicle_id")
+
+            if vehicle_id:
+                # UPDATE
+                bike = get_object_or_404(BikeModel, id=vehicle_id)
+                bike.name = request.POST.get("name")
+                bike.Vehicle_number = request.POST.get("Vehicle_number")
+                bike.mileage = request.POST.get("mileage")
+                bike.rent_per_day = request.POST.get("rent_per_day")
+                bike.Onwer_name = request.POST.get("Onwer_name")
+                bike.Status = request.POST.get("Status")
+
+                if request.FILES.get("bike_image"):
+                    bike.bike_image = request.FILES.get("bike_image")
+
+                bike.save()
+
+            else:
+                # CREATE
+                BikeModel.objects.create(
+                    name=request.POST.get("name"),
+                    Vehicle_number=request.POST.get("Vehicle_number"),
+                    mileage=request.POST.get("mileage"),
+                    rent_per_day=request.POST.get("rent_per_day"),
+                    Onwer_name=request.POST.get("Onwer_name"),
+                    Status=request.POST.get("Status"),
+                    bike_image=request.FILES.get("bike_image")
+                )
+
+            return redirect("vehicle_create")
 
         except IntegrityError:
-            error = "⚠️ Vehicle number already exists!"
+            error = "Vehicle number already exists!"
 
     vehicles = BikeModel.objects.all()
-    return render(
-        request,
-        "Vehicle_detailes.html",
-        {
-            "vehicle": vehicles,
-            "error": error
-        }
-    )
+    return render(request, "Vehicle_detailes.html", {
+        "vehicle": vehicles,
+        "error": error,
+        "edit_vehicle": edit_vehicle
+    })
+
+
+def vehicle_delete(request, id):
+    bike = get_object_or_404(BikeModel, id=id)
+    bike.delete()
+    return redirect("vehicle_create")
+
 

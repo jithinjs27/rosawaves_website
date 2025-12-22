@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -136,5 +136,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# RAZORPAY_KEY_ID='rzp_test_RuXNrjmTSGzq9C'
-# RAZORPAY_KEY_SECRET='dmoReWrzY4H5WeJVKaxHDij3'
+RAZORPAY_KEY_ID='rzp_test_RuXNrjmTSGzq9C'
+RAZORPAY_KEY_SECRET='dmoReWrzY4H5WeJVKaxHDij3'

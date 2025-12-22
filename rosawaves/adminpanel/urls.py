@@ -14,4 +14,5 @@ urlpatterns = [
     path("generate-bill/<int:booking_id>/", views.generate_bill, name="generate_bill"),
     path('offers/', views.offers_fun, name='offers'),
     path("vehicle_details/", views.vehicle_create, name="vehicle_create"),
+    path("delete/<int:id>/", views.vehicle_delete, name="vehicle_delete")
 ]
