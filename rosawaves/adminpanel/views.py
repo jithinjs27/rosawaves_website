@@ -2,10 +2,11 @@ from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-
-from rosawaves_app.models import BikeRental,BikeModel
+from rosawaves_app.models import BikeRental, BikeModel
 from .models import offers
-
+from django.shortcuts import render, redirect
+from django.db import IntegrityError
+from .models import BikeModel
 
 # -------------------------
 # Dashboard
@@ -49,6 +50,10 @@ def approve_booking(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     booking.status = "approved"
     booking.save()
+    bike_status_update = get_object_or_404(BikeModel, Vehicle_number=booking.bike_number)
+    bike_status_update.Status = "Rented"
+    bike_status_update.available_date=booking.dropoff_date
+    bike_status_update.save()
     messages.success(request, f"Booking for {booking.full_name} has been approved.")
     return redirect("admin_dashboard")
 
@@ -140,8 +145,6 @@ def generate_bill(request, booking_id):
     return render(request, "bill.html", context)
 
 
-
-
 def offers_fun(request):
     if request.method == 'POST':
         # Handle delete request
@@ -170,18 +173,33 @@ def offers_fun(request):
     return render(request, 'offers.html', {'offers': all_offers})
 
 
+
+
 def vehicle_create(request):
+    error = None
+
     if request.method == "POST":
-        BikeModel.objects.create(
-            name=request.POST.get("name"),
-            Vehicle_number=request.POST.get("Vehicle_number"),
-            rent_per_day=request.POST.get("rent_per_day"),
-            Onwer_name=request.POST.get("Onwer_name"),
-            Status=request.POST.get("Status")
-        )
-        return redirect("vehicle_create")  # come back to same page
+        try:
+            BikeModel.objects.create(
+                name=request.POST.get("name"),
+                Vehicle_number=request.POST.get("Vehicle_number"),
+                rent_per_day=request.POST.get("rent_per_day"),
+                Onwer_name=request.POST.get("Onwer_name"),
+                Status=request.POST.get("Status"),
+                bike_image=request.FILES.get("bike_image")
+            )
+            return redirect("vehicle_create")  # back to same page
+
+        except IntegrityError:
+            error = "⚠️ Vehicle number already exists!"
 
     vehicles = BikeModel.objects.all()
-    return render(request, "Vehicle_detailes.html", {"vehicle": vehicles})
-
+    return render(
+        request,
+        "Vehicle_detailes.html",
+        {
+            "vehicle": vehicles,
+            "error": error
+        }
+    )
 

@@ -10,6 +10,7 @@ urlpatterns = [
     path('contact/',views.contact_view, name='contact_page'),
     path('booking_status/',views.booking_status_view, name='booking_status'),
     path("success/booking_status/", views.booking_status, name="booking_status"),
+    path("create-order/", views.create_razorpay_order, name="create_razorpay_order"),
     path("success/booking_status/payment/<int:booking_id>/", views.payment_page, name="payment_page"),
 
 

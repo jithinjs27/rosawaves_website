@@ -3,14 +3,17 @@ from .models import BikeRental
 from adminpanel.models import BikeModel
 from adminpanel.models import offers
 from django.http import HttpResponse
-
+import razorpay
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 def user_home_page(request):
     offer=offers.objects.all()
     return render(request, "index_user_home_page.html",{"offers": offer})
 
 
 def user_bike_rental(request):
-    bikes = BikeModel.objects.all()
+    bikes = BikeModel.objects.filter(Status="Available")
     return render(request, "Bike_rental_user_form.html", {"bikes": bikes})
 
 
@@ -30,7 +33,7 @@ def bike_rental_view(request):
         aadhar_upload = request.FILES.get('aadhar_upload', None)
         passport_upload = request.FILES.get('passport_upload', None)
         hotel_upload = request.FILES.get('hotel_upload', None)
-
+        total_bill_amount=request.POST.get("total_bill_amount")
         # Fetch actual bike
         bike = BikeModel.objects.get(id=bike_id)
 
@@ -49,6 +52,9 @@ def bike_rental_view(request):
             # If you add these fields in model later:
             passport_upload=passport_upload,
             hotel_upload=hotel_upload,
+            total_bill_amount=total_bill_amount,
+            bike_number=bike.Vehicle_number
+
         )
         return redirect('success_page')
 
@@ -86,3 +92,20 @@ def payment_page(request, booking_id):
 
 def booking_options(request):
     return render(request,"Booking_option_page.html")
+
+client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+)
+
+@csrf_exempt
+def create_razorpay_order(request):
+    if request.method == "POST":
+        amount = int(request.POST.get("amount"))
+
+        order = client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        return JsonResponse(order)

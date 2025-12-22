@@ -7,6 +7,7 @@ class BikeRental(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=15)
     bike_model = models.CharField(max_length=50)
+    bike_number=models.CharField(max_length=50,default="none")
     rental_days = models.CharField(max_length=50)
     pickup_date = models.DateTimeField()
     dropoff_date = models.DateTimeField()
@@ -21,4 +22,5 @@ class BikeRental(models.Model):
     advance_amount=models.PositiveIntegerField(default=0)
     remarks=models.CharField(max_length=50,default="none")
     Name_of_staff=models.CharField(max_length=50,default="none")
+
 
