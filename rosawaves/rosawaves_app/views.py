@@ -13,8 +13,20 @@ def user_home_page(request):
 
 
 def user_bike_rental(request):
+    # Get only available bikes
     bikes = BikeModel.objects.filter(Status="Available")
+
+    # Add price_category attribute for filtering in template
+    for bike in bikes:
+        if bike.rent_per_day <= 500:
+            bike.price_category = "low"
+        elif bike.rent_per_day <= 1000:
+            bike.price_category = "medium"
+        else:
+            bike.price_category = "high"
+
     return render(request, "Bike_rental_user_form.html", {"bikes": bikes})
+
 
 
 def bike_rental_view(request):

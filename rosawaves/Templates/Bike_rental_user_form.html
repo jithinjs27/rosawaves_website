@@ -70,10 +70,11 @@
         <ul>
           <li><strong>Minimum rental duration:</strong> 4 hours.</li>
           <li><strong>Full payment</strong> must be collected in advance.</li>
-          <li><strong>Security deposit:</strong> ₹1000 (varies by vehicle), refundable within 10 days.</li>
+          <li><strong>Security deposit:</strong> ₹1000 (varies by vehicle), refundable within 20 days.</li>
           <li><strong>Fuel</strong> is not included unless specified.</li>
           <li><strong>Late return charges</strong> apply after a 15-minute grace period.</li>
           <li><strong>No partial refund</strong> for early returns.</li>
+          <li><strong>if the key lost </strong> amount for the repair will be deducted  </li>
         </ul>
 
         <!-- Damage, Theft, and Accident Policy -->
@@ -240,13 +241,21 @@
         </form>
 
         <!-- Booking Summary -->
-        <div class="mt-4">
-          <div class="card shadow-lg border-success">
-            <div class="card-body text-center">
-              <h5 class="card-title text-success fw-bold">Booking Amount</h5>
-              <h2 id="bookingAmountDisplay" class="fw-bold text-success">₹0</h2>
-            </div>
-          </div>
+<!-- Booking Summary -->
+<div class="mt-4">
+  <div class="card shadow-lg border-success">
+    <div class="card-body">
+      <h5 class="card-title text-success fw-bold text-center">Booking Summary</h5>
+
+      <!-- Total Amount -->
+      <h2 id="bookingAmountDisplay" class="fw-bold text-success text-center mb-3">₹0</h2>
+
+      <!-- Price Breakdown -->
+      <ul class="list-group list-group-flush d-none" id="priceBreakdownList"></ul>
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
     </div>
@@ -257,15 +266,29 @@
 <div class="modal fade" id="bikeModal" tabindex="-1" aria-labelledby="bikeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
+
+      <!-- Modal Header -->
       <div class="modal-header">
         <h5 class="modal-title">Choose Your Bike</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
+      <!-- Price Filter Dropdown -->
+      <div class="px-3 pb-3">
+        <select id="priceFilter" class="form-select">
+          <option value="all" selected>All Prices</option>
+          <option value="low">Low (₹0-500)</option>
+          <option value="medium">Medium (₹501-1000)</option>
+          <option value="high">High (₹1001+)</option>
+        </select>
+      </div>
+
+      <!-- Modal Body -->
       <div class="modal-body">
         <div class="row g-4">
+
           {% for bike in bikes %}
-            <div class="col-md-6">
+            <div class="col-md-6 bike-card" data-price="{{ bike.price_category }}">
               <div class="card h-100">
                 {% if bike.bike_image %}
                   <img src="{{ bike.bike_image.url }}" class="card-img-top" alt="{{ bike.name }}">
@@ -288,9 +311,7 @@
                 </div>
               </div>
             </div>
-
           {% empty %}
-            <!-- 🚫 No bikes available -->
             <div class="col-12">
               <div class="alert alert-warning text-center fw-semibold">
                 🚫 All bikes are currently rented.<br>
@@ -298,11 +319,14 @@
               </div>
             </div>
           {% endfor %}
+
         </div>
       </div>
+
     </div>
   </div>
 </div>
+
 
 
 <!-- Scripts -->
@@ -331,6 +355,8 @@
   const pickupDate = document.getElementById('pickupDate');
   const dropoffDate = document.getElementById('dropoffDate');
   let selectedRent = 0;
+  const priceBreakdownList = document.getElementById('priceBreakdownList');
+
 
   form.addEventListener('submit', function(event) {
     if (!form.checkValidity()) {
@@ -403,6 +429,8 @@
 
 function calculateDuration() {
   const submitBtn = document.querySelector('button[type="submit"]');
+  priceBreakdownList.innerHTML = '';
+  priceBreakdownList.classList.add('d-none');
 
   if (pickupDate.value && dropoffDate.value) {
     const start = new Date(pickupDate.value);
@@ -412,52 +440,95 @@ function calculateDuration() {
     if (diffMs > 0) {
       const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
 
-      // 🚫 Minimum 4 hours validation
+      // 🚫 Minimum 4 hours
       if (diffHours < 4) {
-        rentalDaysDisplay.value = `${diffHours} hour(s)`;
-        rentalDaysHidden.value = '';
-        bookingAmount.value = '';
-        bookingAmountDisplay.innerText = '₹0';
+        resetBooking();
         document.getElementById('minHoursError').classList.remove('d-none');
         submitBtn.disabled = true;
         return;
       }
 
-      // ✅ Valid booking
       document.getElementById('minHoursError').classList.add('d-none');
       submitBtn.disabled = false;
 
       rentalDaysDisplay.value = `${diffHours} hour(s)`;
       rentalDaysHidden.value = `${diffHours} hour(s)`;
 
-      let total = 0;
+      let subtotal = 0;
+      const fullDays = Math.floor(diffHours / 24);
+      const remainingHours = diffHours % 24;
 
-      if (selectedRent > 0) {
-        const fullDays = Math.floor(diffHours / 24);
-        const remainingHours = diffHours % 24;
+      // ✅ Full days
+      if (fullDays > 0) {
+        const cost = fullDays * selectedRent;
+        subtotal += cost;
+        priceBreakdownList.innerHTML += `
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Full Days (${fullDays} × ₹${selectedRent})</span>
+            <strong>₹${cost}</strong>
+          </li>`;
+      }
 
-        if (fullDays > 0) {
-          total += fullDays * selectedRent; // full day charges
-        }
+      // ✅ Remaining hours
+      if (remainingHours > 0) {
+        if (remainingHours <= 4) {
+          const halfDay = selectedRent / 2;
+          subtotal += halfDay;
+          priceBreakdownList.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Half Day Charge</span>
+              <strong>₹${halfDay}</strong>
+            </li>`;
+        } else {
+          const halfDay = selectedRent / 2;
+          const extraHours = remainingHours - 4;
+          const extraCharge = extraHours * 50;
 
-        if (remainingHours > 0) {
-          if (remainingHours <= 4) {
-            // Minimum half-day charge for < 4 hours
-            total += selectedRent / 2;
-          } else {
-            // Half-day + extra hours
-            total += selectedRent / 2 + (remainingHours - 4) * 50; // 50/hour extra
-          }
+          subtotal += halfDay + extraCharge;
+
+          priceBreakdownList.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Half Day Charge</span>
+              <strong>₹${halfDay}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Extra Hours (${extraHours} × ₹50)</span>
+              <strong>₹${extraCharge}</strong>
+            </li>`;
         }
       }
 
-      bookingAmount.value = Math.ceil(total);
-      bookingAmountDisplay.innerText = `₹${Math.ceil(total)}`;
+      // ✅ GST Calculation (18%)
+      const gstAmount = subtotal * 0.18;
+      const finalTotal = subtotal + gstAmount;
+
+      // ✅ GST + Total rows
+      priceBreakdownList.innerHTML += `
+        <li class="list-group-item d-flex justify-content-between">
+          <span>Subtotal</span>
+          <strong>₹${Math.ceil(subtotal)}</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span>GST (18%)</span>
+          <strong>₹${Math.ceil(gstAmount)}</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between fw-bold text-success">
+          <span>Total Payable</span>
+          <span>₹${Math.ceil(finalTotal)}</span>
+        </li>`;
+
+      // ✅ Update hidden + display values
+      bookingAmount.value = Math.ceil(finalTotal);
+      bookingAmountDisplay.innerText = `₹${Math.ceil(finalTotal)}`;
+      priceBreakdownList.classList.remove('d-none');
+
     } else {
       resetBooking();
     }
   }
 }
+
+
 
 
 function resetBooking() {
@@ -466,12 +537,33 @@ function resetBooking() {
   rentalDaysHidden.value = '';
   bookingAmount.value = '';
   bookingAmountDisplay.innerText = '₹0';
+  priceBreakdownList.innerHTML = '';
+  priceBreakdownList.classList.add('d-none');
   submitBtn.disabled = true;
   document.getElementById('minHoursError').classList.add('d-none');
 }
 
+
+
+const priceFilter = document.getElementById('priceFilter');
+const bikeCards = document.querySelectorAll('.bike-card');
+
+priceFilter.addEventListener('change', function() {
+  const selected = this.value;
+  bikeCards.forEach(card => {
+    if (selected === 'all' || card.dataset.price === selected) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+
+
   pickupDate.addEventListener('change', calculateDuration);
   dropoffDate.addEventListener('change', calculateDuration);
+
+
 </script>
 </body>
 </html>

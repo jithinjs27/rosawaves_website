@@ -262,26 +262,31 @@ def helmet_accessories(request):
         helmet_id = request.POST.get("helmet_id")
         helmet_name = request.POST.get("helmet_name")
         status = request.POST.get("status")
+        helmet_image = request.FILES.get("helmet_image")
 
         if acc_id:  # UPDATE
             item = accessories.objects.get(id=acc_id)
             item.Helmet_Id = helmet_id
             item.Helmet_name = helmet_name
             item.status = status
+
+            if helmet_image:
+                item.helmet_image = helmet_image
+
             item.save()
         else:  # ADD
             accessories.objects.create(
                 Helmet_Id=helmet_id,
                 Helmet_name=helmet_name,
-                status=status
+                status=status,
+                helmet_image=helmet_image
             )
+
         return redirect("helmet_accessories")
 
-    # Edit
     if "edit" in request.GET:
         edit_item = get_object_or_404(accessories, id=request.GET.get("edit"))
 
-    # Delete
     if "delete" in request.GET:
         accessories.objects.filter(id=request.GET.get("delete")).delete()
         return redirect("helmet_accessories")
@@ -290,7 +295,6 @@ def helmet_accessories(request):
         "helmets": helmets,
         "edit_item": edit_item
     })
-
 
 
 

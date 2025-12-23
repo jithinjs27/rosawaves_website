@@ -14,7 +14,7 @@
     <!-- ADD / UPDATE FORM -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="acc_id" value="{{ edit_item.id }}">
 
@@ -31,7 +31,7 @@
                                value="{{ edit_item.Helmet_name }}" required>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label>Status</label>
                         <select name="status" class="form-select">
                             <option value="Available"
@@ -45,12 +45,24 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="col-md-2">
+                        <label>Helmet Image</label>
+                        <input type="file" name="helmet_image" class="form-control">
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
                         <button class="btn btn-primary w-100">
                             {% if edit_item %}Update{% else %}Add{% endif %}
                         </button>
                     </div>
                 </div>
+
+                {% if edit_item.helmet_image %}
+                <div class="mt-3">
+                    <strong>Current Image:</strong><br>
+                    <img src="{{ edit_item.helmet_image.url }}" width="100" class="rounded border">
+                </div>
+                {% endif %}
             </form>
         </div>
     </div>
@@ -58,10 +70,11 @@
     <!-- TABLE -->
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered">
+            <table class="table table-bordered align-middle text-center">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
+                        <th>Image</th>
                         <th>Helmet ID</th>
                         <th>Helmet Name</th>
                         <th>Status</th>
@@ -72,6 +85,14 @@
                     {% for h in helmets %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if h.helmet_image %}
+                                <img src="{{ h.helmet_image.url }}" width="70" height="70"
+                                     class="rounded border">
+                            {% else %}
+                                <span class="text-muted">No Image</span>
+                            {% endif %}
+                        </td>
                         <td>{{ h.Helmet_Id }}</td>
                         <td>{{ h.Helmet_name }}</td>
                         <td>
@@ -89,7 +110,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">No helmets found</td>
+                        <td colspan="6">No helmets found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -98,13 +119,13 @@
     </div>
 
 </div>
-<script>
-    // Force browser back button to go to Home page
-    window.history.pushState(null, "", window.location.href);
 
+<script>
+    window.history.pushState(null, "", window.location.href);
     window.onpopstate = function () {
         window.location.href = "{% url 'admin_dashboard' %}";
     };
 </script>
+
 </body>
 </html>

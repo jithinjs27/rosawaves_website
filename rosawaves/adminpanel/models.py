@@ -20,5 +20,6 @@ class accessories(models.Model):
     Helmet_Id=models.CharField(max_length=150, blank=True)
     Helmet_name=models.CharField(max_length=150, blank=True)
     status=models.CharField(max_length=20, default="Available")
+    helmet_image=models.FileField(upload_to='helmet_pics/', blank=True, null=True)
     def __str__(self):
         return f"{self.Helmet_Id} - {self.Helmet_name}"
