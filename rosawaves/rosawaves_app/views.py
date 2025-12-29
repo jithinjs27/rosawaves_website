@@ -7,9 +7,11 @@ import razorpay
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+
 def user_home_page(request):
-    offer=offers.objects.all()
-    return render(request, "index_user_home_page.html",{"offers": offer})
+    offer = offers.objects.all()
+    return render(request, "index_user_home_page.html", {"offers": offer})
 
 
 def user_bike_rental(request):
@@ -28,50 +30,53 @@ def user_bike_rental(request):
     return render(request, "Bike_rental_user_form.html", {"bikes": bikes})
 
 
+from django.shortcuts import redirect, get_object_or_404
 
 def bike_rental_view(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
-        bike_id = request.POST.get('bike_model')  # this is a number
+        bike_id = request.POST.get('bike_model')
         rental_days = request.POST.get('rental_days', '')
         pickup_date = request.POST.get('pickup_date')
         dropoff_date = request.POST.get('dropoff_date')
         rider_pic = request.FILES.get('rider_pic')
         license_number = request.POST.get('license_number')
 
-        # File uploads
-        aadhar_upload = request.FILES.get('aadhar_upload', None)
-        passport_upload = request.FILES.get('passport_upload', None)
-        hotel_upload = request.FILES.get('hotel_upload', None)
-        total_bill_amount=request.POST.get("total_bill_amount")
-        # Fetch actual bike
-        bike = BikeModel.objects.get(id=bike_id)
+        aadhar_upload = request.FILES.get('aadhar_upload')
+        passport_upload = request.FILES.get('passport_upload')
+        hotel_upload = request.FILES.get('hotel_upload')
+        total_bill_amount = request.POST.get("total_bill_amount")
 
-        # Save booking
-        BikeRental.objects.create(
+        # Fetch bike safely
+        bike = get_object_or_404(BikeModel, id=bike_id)
+
+        # ✅ SAVE & CAPTURE BOOKING
+        booking = BikeRental.objects.create(
             full_name=full_name,
             email=email,
             phone=phone,
-            bike_model=bike.name,  # storing name (your model uses CharField)
+            bike_model=bike.name,
             rental_days=rental_days,
             pickup_date=pickup_date,
             dropoff_date=dropoff_date,
             rider_pic=rider_pic,
             license_number=license_number,
             aadhar_upload=aadhar_upload,
-            # If you add these fields in model later:
             passport_upload=passport_upload,
             hotel_upload=hotel_upload,
             total_bill_amount=total_bill_amount,
-            bike_number=bike.Vehicle_number
-
+            bike_number=bike.Vehicle_number,
+            status="pending"   # recommended
         )
-        return redirect('success_page')
+
+        # ✅ THIS IS THE NAVIGATION
+        return redirect('payment_page', booking_id=booking.id)
 
     bikes = BikeModel.objects.all()
     return render(request, 'Bike_rental_user_form.html', {"bikes": bikes})
+
 
 
 def success_view(request):
@@ -98,16 +103,19 @@ def booking_status(request):
     return render(request, "booking_status.html", {"bookings": bookings, "query": query})
 
 
-def payment_page(request, booking_id):
-    booking = get_object_or_404(BikeRental, id=booking_id)
-    return render(request, "payment.html", {"booking": booking})
+# def payment_page(request, booking_id):
+#     booking = get_object_or_404(BikeRental, id=booking_id)
+#     return render(request, "payment.html", {"booking": booking})
+
 
 def booking_options(request):
-    return render(request,"Booking_option_page.html")
+    return render(request, "Booking_option_page.html")
+
 
 client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
+
 
 @csrf_exempt
 def create_razorpay_order(request):
@@ -121,3 +129,49 @@ def create_razorpay_order(request):
         })
 
         return JsonResponse(order)
+
+
+def proceed_to_payment(request):
+    if request.method == "POST":
+        booking = BikeRental.objects.create(
+            full_name=request.POST["full_name"],
+            email=request.POST["email"],
+            phone=request.POST["phone"],
+            bike_id=request.POST["bike_model"],
+            pickup_date=request.POST["pickup_date"],
+            dropoff_date=request.POST["dropoff_date"],
+            total_bill_amount=request.POST["total_bill_amount"],
+            status="pending"
+        )
+
+        return redirect("payment_page", booking_id=booking.id)
+
+
+def payment_page(request, booking_id):
+    booking = BikeRental.objects.get(id=booking_id)
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+
+    order = client.order.create({
+        "amount": booking.total_bill_amount * 100,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    return render(request, "payment.html", {
+        "booking": booking,
+        "order_id": order["id"],
+        "razorpay_key": settings.RAZORPAY_KEY_ID
+    })
+
+
+def payment_success(request, booking_id):
+    booking = BikeRental.objects.get(id=booking_id)
+
+    booking.status = "PAID"
+    # booking.razorpay_payment_id = request.GET.get("pid")
+    booking.save()
+
+    return render(request, "success.html", {"booking": booking})

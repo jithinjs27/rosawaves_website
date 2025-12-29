@@ -27,6 +27,7 @@ def admin_dashboard(request):
 # Active Bookings
 # ----------------
 # ---------
+@login_required(login_url='login')
 def active_bookings_function(request):
     now = datetime.now()
 
@@ -43,6 +44,7 @@ def active_bookings_function(request):
 # -------------------------
 # Return Due Bookings
 # -------------------------
+@login_required(login_url='login')
 def return_due_function(request):
     now = datetime.now()
     return_due_bookings = BikeRental.objects.filter(
@@ -55,6 +57,7 @@ def return_due_function(request):
 # -------------------------
 # Approve / Reject
 # -------------------------
+@login_required(login_url='login')
 def approve_booking(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     booking.status = "approved"
@@ -67,6 +70,7 @@ def approve_booking(request, booking_id):
     return redirect("admin_dashboard")
 
 
+@login_required(login_url='login')
 def reject_booking(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     booking.status = "rejected"
@@ -78,6 +82,7 @@ def reject_booking(request, booking_id):
 # -------------------------
 # Edit Booking
 # -------------------------
+@login_required(login_url='login')
 def edit_booking(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
 
@@ -103,6 +108,7 @@ def edit_booking(request, booking_id):
 # -------------------------
 # Deposit Pending
 # -------------------------
+@login_required(login_url='login')
 def deposit_pending(request):
     # Fetch bookings that are returned (but deposit not settled)
     deposit_pending_bookings = BikeRental.objects.filter(status="Returned")
@@ -115,6 +121,7 @@ def deposit_pending(request):
 # -------------------------
 # Process Return
 # -------------------------
+@login_required(login_url='login')
 def process_return(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
     booking.status = "Returned"
@@ -127,6 +134,7 @@ def process_return(request, booking_id):
     return redirect("return_bookings")
 
 
+@login_required(login_url='login')
 def return_bookings(request):
     return_due_bookings = BikeRental.objects.filter(status="approved")
     return render(request, "return_bookings.html", {"return_due_bookings": return_due_bookings})
@@ -135,6 +143,7 @@ def return_bookings(request):
 # -------------------------
 # Generate Bill
 # -------------------------
+@login_required(login_url='login')
 def generate_bill(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
 
@@ -159,6 +168,7 @@ def generate_bill(request, booking_id):
     return render(request, "bill.html", context)
 
 
+@login_required(login_url='login')
 def offers_fun(request):
     if request.method == 'POST':
         # Handle delete request
@@ -191,6 +201,7 @@ def offers_fun(request):
 
 
 
+@login_required(login_url='login')
 def vehicle_create(request):
     error = None
     edit_vehicle = None
@@ -243,6 +254,7 @@ def vehicle_create(request):
     })
 
 
+@login_required(login_url='login')
 def vehicle_delete(request, id):
     bike = get_object_or_404(BikeModel, id=id)
     bike.delete()
@@ -253,6 +265,7 @@ def vehicle_delete(request, id):
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import accessories
 
+@login_required(login_url='login')
 def helmet_accessories(request):
     helmets = accessories.objects.all()
     edit_item = None
@@ -313,17 +326,17 @@ def user_login(request):
     return render(request, "admin_login.html")
 
 
-def register(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Account created successfully")
-            return redirect("login")
-    else:
-        form = UserCreationForm()
-
-    return render(request, "admin_register.html")
+# def register(request):
+#     if request.method == "POST":
+#         form = UserCreationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Account created successfully")
+#             return redirect("login")
+#     else:
+#         form = UserCreationForm()
+#
+#     return render(request, "admin_register.html")
 
 
 
