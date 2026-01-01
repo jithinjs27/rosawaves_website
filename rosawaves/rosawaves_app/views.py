@@ -7,7 +7,10 @@ import razorpay
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db import transaction
+from django.shortcuts import render, redirect
+from django.contrib import messages
+import razorpay
 
 def user_home_page(request):
     offer = offers.objects.all()
@@ -71,7 +74,6 @@ def bike_rental_view(request):
             status="pending"   # recommended
         )
 
-        # ✅ THIS IS THE NAVIGATION
         return redirect('payment_page', booking_id=booking.id)
 
     bikes = BikeModel.objects.all()
@@ -141,37 +143,65 @@ def proceed_to_payment(request):
             pickup_date=request.POST["pickup_date"],
             dropoff_date=request.POST["dropoff_date"],
             total_bill_amount=request.POST["total_bill_amount"],
-            status="pending"
+            status="pending",
+            payment_status="initiated"
         )
+
 
         return redirect("payment_page", booking_id=booking.id)
 
 
+
+
 def payment_page(request, booking_id):
-    booking = BikeRental.objects.get(id=booking_id)
+    try:
+        with transaction.atomic():
+            # Lock the booking row
+            booking = BikeRental.objects.select_for_update().get(id=booking_id)
 
-    client = razorpay.Client(
-        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-    )
+            # Lock the bike row
+            bike = BikeModel.objects.select_for_update().get(Vehicle_number=booking.bike_number)
 
-    order = client.order.create({
-        "amount": booking.total_bill_amount * 100,
-        "currency": "INR",
-        "payment_capture": 1
-    })
+            # Check availability AGAIN (inside transaction)
+            if bike.Status != "Available":
+                messages.error(request, "Sorry! This bike was just booked by another user.")
+                return redirect("user-bike-rental")
 
-    return render(request, "payment.html", {
-        "booking": booking,
-        "order_id": order["id"],
-        "razorpay_key": settings.RAZORPAY_KEY_ID
-    })
+            # Razorpay client
+            client = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+            )
+
+            order = client.order.create({
+                "amount": int(booking.total_bill_amount * 100),
+                "currency": "INR",
+                "payment_capture": 1
+            })
+
+            # Save Razorpay Order ID
+            booking.razorpay_order_id = order["id"]
+            booking.save()
+
+        return render(request, "payment.html", {
+            "booking": booking,
+            "order_id": order["id"],
+            "razorpay_key": settings.RAZORPAY_KEY_ID
+        })
+
+    except BikeRental.DoesNotExist:
+        messages.error(request, "Invalid booking.")
+        return redirect("home")
+
+    except BikeModel.DoesNotExist:
+        messages.error(request, "Bike not found.")
+        return redirect("home")
+
 
 
 def payment_success(request, booking_id):
     booking = BikeRental.objects.get(id=booking_id)
-
-    booking.status = "PAID"
-    # booking.razorpay_payment_id = request.GET.get("pid")
+    booking.payment_status = "paid"
+    booking.razorpay_payment_id = request.GET.get("pid")
     booking.save()
 
     return render(request, "success.html", {"booking": booking})
