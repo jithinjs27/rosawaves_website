@@ -36,35 +36,36 @@
               <th>Bike Model</th>
               <th>Booking Date</th>
               <th>Status</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {% if bookings %}
               {% for booking in bookings %}
                 <tr>
-                  <td>BR-{{ booking.id }}</td>
+                  <td>UK-{{ booking.id }}</td>
                   <td>{{ booking.full_name }}</td>
                   <td>{{ booking.bike_model }}</td>
                   <td>{{ booking.pickup_date }}</td>
                   <td>
-                    {% if booking.status == "approved" %}
-                      <span class="badge status-booked">Approved</span>
-                    {% elif booking.status == "rejected" %}
-                      <span class="badge status-inuse">Rejected</span>
-                    {% elif booking.status == "Returned" %}
-                      <span class="badge status-returned">Returned</span>
-                    {% elif booking.status == "Cancelled" %}
-                      <span class="badge status-cancelled">Cancelled</span>
-                    {% endif %}
+                    {% with booking.Status|lower as status %}
+                      {% if status == "approved" %}
+                        <span class="badge status-booked">Approved</span>
+
+                      {% elif status == "rejected" %}
+                        <span class="badge status-inuse">Rejected</span>
+
+                      {% elif status == "returned" %}
+                        <span class="badge status-returned">Returned</span>
+
+                      {% elif status == "cancelled" %}
+                        <span class="badge status-cancelled">Cancelled</span>
+
+                      {% else %}
+                        <span class="badge bg-secondary">{{ booking.status }}</span>
+                      {% endif %}
+                    {% endwith %}
                   </td>
-                  <td>
-                    {% if booking.status == "approved" %}
-                      <a href="{% url 'payment_page' booking.id %}" class="btn btn-success btn-sm">Pay Online</a>
-                    {% else %}
-                      <span class="text-muted">-</span>
-                    {% endif %}
-                  </td>
+
                 </tr>
               {% endfor %}
             {% else %}

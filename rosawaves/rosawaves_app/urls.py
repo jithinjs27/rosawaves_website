@@ -16,11 +16,18 @@ urlpatterns = [
     path('payment/success/<int:booking_id>/', views.payment_success, name="payment_success"),
 
     # Booking status
-    path('booking/status/', views.booking_status_view, name='booking_status'),
+    path('booking/status/', views.booking_status, name='booking_status'),
 
     # Static pages
     path('contact/', views.contact_view, name='contact'),
 
     # Razorpay (only if you still use AJAX somewhere)
     path('create-order/', views.create_razorpay_order, name='create_razorpay_order'),
+
+    path(
+        "ajax/available-bikes/",
+        views.ajax_available_bikes,
+        name="ajax_available_bikes"
+    ),
+
 ]

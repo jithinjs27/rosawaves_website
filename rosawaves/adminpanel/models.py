@@ -6,7 +6,7 @@ class BikeModel(models.Model):
     mileage = models.CharField(max_length=20, blank=True)
     rent_per_day = models.PositiveIntegerField()
     Onwer_name=models.CharField(max_length=20, blank=True)
-    Status=models.CharField(max_length=20, default="Free")
+    Status=models.CharField(max_length=20, default="Available")
     bike_image=models.FileField(upload_to='bike_pics/', blank=True, null=True)
     available_date = models.DateTimeField(default=timezone.now)
 

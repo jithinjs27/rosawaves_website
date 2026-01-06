@@ -40,6 +40,18 @@ def active_bookings_function(request):
 
     return render(request, "active_booking.html", {"active_bookings": active_bookings,"helmets": helmets})
 
+@login_required(login_url='login')
+def live_bookings_function(request):
+    now = datetime.now()
+
+    active_bookings = BikeRental.objects.filter(
+        pickup_date__lte=now,
+        dropoff_date__gte=now,
+        status="approved"
+    )
+    helmets = accessories.objects.all()
+
+    return render(request, "live_booking.html", {"active_bookings": active_bookings,"helmets": helmets})
 
 # -------------------------
 # Return Due Bookings

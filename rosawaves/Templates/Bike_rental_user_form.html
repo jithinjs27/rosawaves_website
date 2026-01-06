@@ -136,26 +136,6 @@
             <label class="form-label">Phone Number *</label>
             <input type="tel" name="phone" class="form-control" required>
           </div>
-
-          <!-- Bike Selection -->
-          <div class="mb-3">
-            <label class="form-label">Select Bike Model *</label>
-            <div class="input-group">
-              <select class="form-select" name="bike_model" id="bikeModel" required>
-                <option value="" disabled selected>Choose a bike</option>
-                {% for bike in bikes %}
-                  <option value="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}">{{ bike.name }}</option>
-                {% endfor %}
-              </select>
-              <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bikeModal">
-                View Bikes
-              </button>
-            </div>
-          </div>
-
-          <!-- Rental Duration -->
-
-
           <!-- Pickup Date -->
           <div class="mb-3">
             <label class="form-label">Booking Start (Date & Time) *</label>
@@ -167,6 +147,28 @@
             <label class="form-label">Booking End (Date & Time) *</label>
             <input type="text" name="dropoff_date" class="form-control datetimepicker" id="dropoffDate" required>
           </div>
+          <!-- Bike Selection -->
+          <div class="mb-3">
+            <label class="form-label">Select Bike Model *</label>
+            <div class="input-group">
+              <select class="form-select" name="bike_model" id="bikeModel" required>
+                <option value="" disabled selected>Choose a bike</option>
+                {% for bike in bikes %}
+<!--                  <option value="{{ bike.id }}" data-rent="{{ bike.rent_per_day }}">{{ bike.name }}</option>-->
+                {% endfor %}
+              </select>
+<button type="button"
+        class="btn btn-outline-secondary"
+        data-bs-toggle="modal"
+        data-bs-target="#bikeModal"
+        onclick="loadAvailableBikes()">
+  View Bikes
+</button>
+
+            </div>
+          </div>
+
+
 
           <div class="mb-3">
             <label class="form-label">Rental Duration *</label>
@@ -285,43 +287,11 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-        <div class="row g-4">
+  <div class="row g-4" id="bikeList">
+    <!-- AJAX will load available bikes here -->
+  </div>
+</div>
 
-          {% for bike in bikes %}
-            <div class="col-md-6 bike-card" data-price="{{ bike.price_category }}">
-              <div class="card h-100">
-                {% if bike.bike_image %}
-                  <img src="{{ bike.bike_image.url }}" class="card-img-top" alt="{{ bike.name }}">
-                {% else %}
-                  <img src="https://via.placeholder.com/400x250?text={{ bike.name }}" class="card-img-top" alt="{{ bike.name }}">
-                {% endif %}
-                <div class="card-body">
-                  <h5 class="card-title">{{ bike.name }}</h5>
-                  <p class="card-text">
-                    Vehicle number: {{ bike.Vehicle_number }}<br>
-                    Rent: ₹{{ bike.rent_per_day }}/day
-                  </p>
-                  <button type="button"
-                          class="btn btn-primary w-100 select-bike"
-                          data-id="{{ bike.id }}"
-                          data-rent="{{ bike.rent_per_day }}"
-                          data-bs-dismiss="modal">
-                    Select
-                  </button>
-                </div>
-              </div>
-            </div>
-          {% empty %}
-            <div class="col-12">
-              <div class="alert alert-warning text-center fw-semibold">
-                🚫 All bikes are currently rented.<br>
-                Please check back later or contact us for availability.
-              </div>
-            </div>
-          {% endfor %}
-
-        </div>
-      </div>
 
     </div>
   </div>
@@ -565,5 +535,90 @@ priceFilter.addEventListener('change', function() {
 
 
 </script>
+
+<script>
+function loadAvailableBikes() {
+  const pickup = document.getElementById("pickupDate").value;
+  const dropoff = document.getElementById("dropoffDate").value;
+  const container = document.getElementById("bikeList");
+
+  if (!pickup || !dropoff) {
+    container.innerHTML = `
+      <div class="alert alert-info text-center">
+        Please select pickup & dropoff dates
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="text-center my-3">
+      <div class="spinner-border"></div>
+    </div>`;
+
+  fetch(`/ajax/available-bikes/?pickup_date=${pickup.replace(" ", "T")}&dropoff_date=${dropoff.replace(" ", "T")}`)
+    .then(response => response.json())
+    .then(bikes => {
+      container.innerHTML = "";
+
+      if (bikes.length === 0) {
+        container.innerHTML = `
+          <div class="alert alert-warning text-center fw-bold">
+            🚫 No bikes available
+          </div>`;
+        return;
+      }
+
+      bikes.forEach(bike => {
+        container.innerHTML += `
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <img src="${bike.image || 'https://via.placeholder.com/400x250'}"
+                   class="card-img-top">
+              <div class="card-body">
+                <h5>${bike.name}</h5>
+                <p class="mb-1">Vehicle No: ${bike.bike_number}</p>
+                <p class="fw-bold">₹${bike.rent}/day</p>
+                <button class="btn btn-primary w-100"
+                        onclick="selectBike(${bike.id}, '${bike.bike_number}', ${bike.rent})">
+                  Select Bike
+                </button>
+              </div>
+            </div>
+          </div>`;
+      });
+    });
+}
+
+function selectBike(id, bikeNumber, rent) {
+  const bikeSelect = document.getElementById("bikeModel");
+
+  // Remove previously added dynamic option
+  const existingOption = bikeSelect.querySelector(`option[value="${id}"]`);
+  if (!existingOption) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.text = `Bike No: ${bikeNumber} (₹${rent}/day)`;
+    option.setAttribute("data-rent", rent);
+    bikeSelect.appendChild(option);
+  }
+
+  bikeSelect.value = id;
+
+  selectedRent = rent;
+  calculateDuration();
+
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(
+    document.getElementById("bikeModal")
+  );
+  modal.hide();
+}
+
+
+pickupDate.addEventListener('change', loadAvailableBikes);
+dropoffDate.addEventListener('change', loadAvailableBikes);
+
+</script>
+
 </body>
 </html>

@@ -93,16 +93,26 @@ def booking_status_view(request):
     return render(request, "booking_status.html")
 
 
+from django.db.models import Q
+
 def booking_status(request):
-    query = request.GET.get("q", "")
-    bookings = []
+    query = request.GET.get("q", "").strip()
+    bookings = BikeRental.objects.none()
 
     if query:
-        bookings = BikeRental.objects.filter(
-            email__icontains=query
-        ) | BikeRental.objects.filter(id__icontains=query)
+        if query.isdigit():
+            bookings = BikeRental.objects.filter(id=int(query))
+        else:
+            bookings = BikeRental.objects.filter(
+                Q(email__icontains=query)
+            )
 
-    return render(request, "booking_status.html", {"bookings": bookings, "query": query})
+    return render(
+        request,
+        "booking_status.html",
+        {"bookings": bookings, "query": query}
+    )
+
 
 
 # def payment_page(request, booking_id):
@@ -205,3 +215,56 @@ def payment_success(request, booking_id):
     booking.save()
 
     return render(request, "success.html", {"booking": booking})
+
+from django.http import JsonResponse
+from django.db.models import Q
+
+from .models import BikeModel, BikeRental
+
+
+def ajax_available_bikes(request):
+    pickup = parse_datetime_safe(request.GET.get("pickup_date"))
+    dropoff = parse_datetime_safe(request.GET.get("dropoff_date"))
+
+    if not pickup or not dropoff:
+        return JsonResponse([], safe=False)
+
+    bikes = BikeModel.objects.filter(Status="Available")
+
+    booked_bike_numbers = BikeRental.objects.filter(
+        Q(pickup_date__lt=dropoff) &
+        Q(dropoff_date__gt=pickup) &
+        Q(status__in=["pending", "confirmed", "paid"])
+    ).values_list("bike_number", flat=True)
+
+    bikes = bikes.exclude(
+        Vehicle_number__in=booked_bike_numbers
+    )
+
+    data = [
+        {
+            "id": bike.id,
+            "name": bike.name,
+            "bike_number": bike.Vehicle_number,
+            "rent": bike.rent_per_day,
+            "image": bike.bike_image.url if bike.bike_image else "",
+        }
+        for bike in bikes
+    ]
+
+    return JsonResponse(data, safe=False)
+
+
+from datetime import datetime
+
+def parse_datetime_safe(value):
+    if not value:
+        return None
+
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M"):
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            pass
+
+    return None
