@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 import razorpay
 
+
 def user_home_page(request):
     offer = offers.objects.all()
     return render(request, "index_user_home_page.html", {"offers": offer})
@@ -35,43 +36,58 @@ def user_bike_rental(request):
 
 from django.shortcuts import redirect, get_object_or_404
 
+
 def bike_rental_view(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
+
+        alternate_ph = request.POST.get('alternate_ph')
+        emergency_ph = request.POST.get('emergency_ph')
+        upid = request.POST.get('upid')
+
         bike_id = request.POST.get('bike_model')
-        rental_days = request.POST.get('rental_days', '')
+        rental_days = request.POST.get('rental_days')
         pickup_date = request.POST.get('pickup_date')
         dropoff_date = request.POST.get('dropoff_date')
+
         rider_pic = request.FILES.get('rider_pic')
         license_number = request.POST.get('license_number')
 
         aadhar_upload = request.FILES.get('aadhar_upload')
         passport_upload = request.FILES.get('passport_upload')
         hotel_upload = request.FILES.get('hotel_upload')
+
         total_bill_amount = request.POST.get("total_bill_amount")
 
-        # Fetch bike safely
         bike = get_object_or_404(BikeModel, id=bike_id)
 
-        # ✅ SAVE & CAPTURE BOOKING
         booking = BikeRental.objects.create(
             full_name=full_name,
             email=email,
             phone=phone,
+            alternate_ph=alternate_ph,
+            emergency_ph=emergency_ph,
+            upid=upid,
+
             bike_model=bike.name,
+            bike_number=bike.Vehicle_number,
+
             rental_days=rental_days,
             pickup_date=pickup_date,
             dropoff_date=dropoff_date,
+
             rider_pic=rider_pic,
             license_number=license_number,
+
             aadhar_upload=aadhar_upload,
             passport_upload=passport_upload,
             hotel_upload=hotel_upload,
+
             total_bill_amount=total_bill_amount,
-            bike_number=bike.Vehicle_number,
-            status="pending"   # recommended
+            payment_status="pending",
+            status="pending"
         )
 
         return redirect('payment_page', booking_id=booking.id)
@@ -95,6 +111,7 @@ def booking_status_view(request):
 
 from django.db.models import Q
 
+
 def booking_status(request):
     query = request.GET.get("q", "").strip()
     bookings = BikeRental.objects.none()
@@ -112,7 +129,6 @@ def booking_status(request):
         "booking_status.html",
         {"bookings": bookings, "query": query}
     )
-
 
 
 # def payment_page(request, booking_id):
@@ -157,10 +173,7 @@ def proceed_to_payment(request):
             payment_status="initiated"
         )
 
-
         return redirect("payment_page", booking_id=booking.id)
-
-
 
 
 def payment_page(request, booking_id):
@@ -170,10 +183,9 @@ def payment_page(request, booking_id):
             booking = BikeRental.objects.select_for_update().get(id=booking_id)
 
             # Lock the bike row
-            bike = BikeModel.objects.select_for_update().get(Vehicle_number=booking.bike_number)
-
             # Check availability AGAIN (inside transaction)
-            if bike.Status != "Available":
+
+            if booking.payment_status == "paid":
                 messages.error(request, "Sorry! This bike was just booked by another user.")
                 return redirect("user-bike-rental")
 
@@ -207,7 +219,6 @@ def payment_page(request, booking_id):
         return redirect("home")
 
 
-
 def payment_success(request, booking_id):
     booking = BikeRental.objects.get(id=booking_id)
     booking.payment_status = "paid"
@@ -216,28 +227,51 @@ def payment_success(request, booking_id):
 
     return render(request, "success.html", {"booking": booking})
 
+
 from django.http import JsonResponse
 from django.db.models import Q
 
 from .models import BikeModel, BikeRental
 
+from django.http import JsonResponse
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
+from django.db.models import Q
+
+from django.http import JsonResponse
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
+from django.db.models import Q
+
 
 def ajax_available_bikes(request):
-    pickup = parse_datetime_safe(request.GET.get("pickup_date"))
-    dropoff = parse_datetime_safe(request.GET.get("dropoff_date"))
+    pickup_str = request.GET.get("pickup_date")
+    dropoff_str = request.GET.get("dropoff_date")
+
+    if not pickup_str or not dropoff_str:
+        return JsonResponse([], safe=False)
+
+    pickup = parse_datetime(pickup_str)
+    dropoff = parse_datetime(dropoff_str)
 
     if not pickup or not dropoff:
         return JsonResponse([], safe=False)
 
-    bikes = BikeModel.objects.filter(Status="Available")
+    # Make timezone aware
+    if pickup.tzinfo is None:
+        pickup = make_aware(pickup)
+    if dropoff.tzinfo is None:
+        dropoff = make_aware(dropoff)
 
+    # 🔴 Bikes already booked in selected period
     booked_bike_numbers = BikeRental.objects.filter(
-        Q(pickup_date__lt=dropoff) &
-        Q(dropoff_date__gt=pickup) &
-        Q(status__in=["pending", "confirmed", "paid"])
+        pickup_date__lt=dropoff,
+        dropoff_date__gt=pickup,
+        status__in=["pending", "approved"]
     ).values_list("bike_number", flat=True)
 
-    bikes = bikes.exclude(
+    # ✅ Available bikes = all bikes EXCEPT booked ones
+    bikes = BikeModel.objects.exclude(
         Vehicle_number__in=booked_bike_numbers
     )
 
@@ -257,6 +291,7 @@ def ajax_available_bikes(request):
 
 from datetime import datetime
 
+
 def parse_datetime_safe(value):
     if not value:
         return None
@@ -268,3 +303,36 @@ def parse_datetime_safe(value):
             pass
 
     return None
+
+
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from .models import BikeRental
+
+
+def download_invoice(request, booking_id):
+    booking = BikeRental.objects.get(id=booking_id)
+    bike = BikeModel.objects.get(Vehicle_number=booking.bike_number)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{booking.id}.pdf"'
+
+    p = canvas.Canvas(response)
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(200, 800, "Rosa Waves Bike Rental")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(50, 760, f"Invoice ID: UK-{booking.id}")
+    p.drawString(50, 740, f"Payment Status: {booking.payment_status}")
+
+    p.drawString(50, 680, f"Customer Name: {booking.full_name}")
+    p.drawString(50, 660, f"Bike: {bike.name}")
+    p.drawString(50, 640, f"Rental Date: {booking.pickup_date} to {booking.dropoff_date}")
+    p.drawString(50, 620, f"Total Amount: ₹{booking.total_bill_amount}")
+
+    p.drawString(50, 580, "Thank you for choosing Rosa Waves!")
+
+    p.showPage()
+    p.save()
+
+    return response

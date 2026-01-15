@@ -3,27 +3,200 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bill - {{ booking.full_name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Invoice - {{ booking.full_name }}</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .invoice-box {
+            width: 800px;
+            margin: auto;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #000;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .company-details {
+            font-size: 14px;
+        }
+
+        .invoice-title {
+            text-align: right;
+        }
+
+        .invoice-title h1 {
+            margin: 0;
+            color: #888;
+            letter-spacing: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        table th, table td {
+            border: 1px solid #aaa;
+            padding: 8px;
+        }
+
+        table th {
+            background: #e6e6e6;
+            text-align: left;
+        }
+
+        .no-border td {
+            border: none;
+            padding: 4px;
+        }
+
+        .section-title {
+            background: #e6e6e6;
+            padding: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media print {
+            body {
+                background: none;
+            }
+        }
+    </style>
 </head>
-<body class="p-4">
-    <div class="container bg-white p-4 rounded shadow">
-        <h2 class="mb-4">Rental Bill</h2>
-        <p><strong>Customer:</strong> {{ booking.full_name }}</p>
-        <p><strong>Bike Model:</strong> {{ booking.bike_model }}</p>
-        <p><strong>Pickup Date:</strong> {{ booking.pickup_date }}</p>
-        <p><strong>Dropoff Date:</strong> {{ booking.dropoff_date }}</p>
-        <p><strong>Rental Days:</strong> {{ booking.rental_days }}</p>
-        <hr>
-        <p><strong>Rate per Day:</strong> ₹{{ rental_rate }}</p>
-        <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
-        <p><strong>Advance Paid:</strong> ₹{{ booking.advance_amount }}</p>
-        <p><strong>Deposit:</strong> ₹{{ booking.deposit_amount }}</p>
-        <h4><strong>Balance Due:</strong> ₹{{ balance }}</h4>
-        <hr>
-        <a href="#" onclick="window.print()" class="btn btn-primary">
-            <i class="fas fa-print"></i> Print Bill
-        </a>
+
+<body>
+<div class="invoice-box">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="company-details">
+            <strong>[Company Name]</strong><br>
+            [Street Address]<br>
+            [City, State, ZIP]<br>
+            Phone: [000-000-0000]
+        </div>
+
+        <div class="invoice-title">
+            <h1>INVOICE</h1>
+            <table>
+                <tr>
+                    <th>INVOICE #</th>
+                    <td>{{ booking.id }}</td>
+                </tr>
+                <tr>
+                    <th>DATE</th>
+                    <td>{{ booking.pickup_date|date:"d-m-Y" }}</td>
+                </tr>
+                <tr>
+                    <th>CUSTOMER ID</th>
+                    <td>{{ booking.phone }}</td>
+                </tr>
+                <tr>
+                    <th>TERMS</th>
+                    <td>Cash / Online</td>
+                </tr>
+            </table>
+        </div>
     </div>
+
+    <!-- BILL / SHIP -->
+    <table class="no-border" style="margin-top:20px;">
+        <tr>
+            <td width="50%">
+                <div class="section-title">BILL TO</div>
+                {{ booking.full_name }}<br>
+                Phone: {{ booking.phone }}<br>
+                Email: {{ booking.email }}
+            </td>
+            <td width="50%">
+                <div class="section-title">SHIP TO</div>
+                {{ booking.full_name }}<br>
+                Bike No: {{ booking.bike_number }}<br>
+                Bike Model: {{ booking.bike_model }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- ITEMS -->
+    <table>
+        <tr>
+            <th width="45%">DESCRIPTION</th>
+            <th width="10%" class="center">QTY</th>
+            <th width="20%" class="right">UNIT PRICE</th>
+            <th width="25%" class="right">AMOUNT</th>
+        </tr>
+
+        <tr>
+            <td>Bike Rental ({{ booking.rental_days }} Days)</td>
+            <td class="center">{{ booking.rental_days }}</td>
+            <td class="right">₹{{ rental_rate }}</td>
+            <td class="right">₹{{ total_amount }}</td>
+        </tr>
+
+        <tr>
+            <td>Advance Paid</td>
+            <td class="center">-</td>
+            <td class="right">-</td>
+            <td class="right">- ₹{{ booking.advance_amount }}</td>
+        </tr>
+
+        <tr>
+            <td>Security Deposit</td>
+            <td class="center">-</td>
+            <td class="right">-</td>
+            <td class="right">₹{{ booking.deposit_amount }}</td>
+        </tr>
+
+        <tr class="total-row">
+            <td colspan="3" class="right">TOTAL</td>
+            <td class="right">₹{{ balance }}</td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p><em>Thank you for your business!</em></p>
+        <p>
+            If you have any questions about this invoice, please contact<br>
+            [Name, Phone, Email]
+        </p>
+    </div>
+
+    <div class="center">
+        <button onclick="window.print()">Print Invoice</button>
+    </div>
+
+</div>
 </body>
 </html>

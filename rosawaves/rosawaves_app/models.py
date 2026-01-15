@@ -4,8 +4,12 @@ from adminpanel.models import BikeModel  # Import from the other app
 
 class BikeRental(models.Model):
     full_name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100,default="none")
     email = models.EmailField()
     phone = models.CharField(max_length=15)
+    alternate_ph=models.CharField(max_length=15,default="1")
+    emergency_ph=models.CharField(max_length=15,default="1")
+    upid=models.CharField(max_length=50,default="none")
     bike_model = models.CharField(max_length=50)
     bike_number=models.CharField(max_length=50,default="none")
     rental_days = models.CharField(max_length=50)

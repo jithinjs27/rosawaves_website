@@ -180,6 +180,21 @@
   Minimum booking duration is 4 hours.
 </div>
 
+          <div class="mb-3">
+  <label class="form-label">Alternate Phone Number</label>
+  <input type="tel" name="alternate_ph" class="form-control">
+</div>
+<div class="mb-3">
+  <label class="form-label">Emergency Contact Number *</label>
+  <input type="tel" name="emergency_ph" class="form-control" required>
+</div>
+<div class="mb-3">
+  <label class="form-label">UPI ID (refund for payments)</label>
+  <input type="text"
+         name="upid"
+         class="form-control"
+         placeholder="example@upi">
+</div>
 
           <!-- Rider Picture -->
           <div class="mb-3">
@@ -389,13 +404,17 @@
   });
 
   flatpickr(".datetimepicker", {
-    enableTime: true,
-    time_24hr: false,
-    minDate: "today",
-    altInput: true,
-    altFormat: "F j, Y h:i K",
-    dateFormat: "Y-m-d H:i"
-  });
+  enableTime: true,
+  minDate: "today",
+  altInput: true,
+  altFormat: "F j, Y h:i K",
+  dateFormat: "Y-m-d H:i",
+  onClose: function () {
+    loadAvailableBikes();
+    calculateDuration();
+  }
+});
+
 
 function calculateDuration() {
   const submitBtn = document.querySelector('button[type="submit"]');
@@ -538,8 +557,8 @@ priceFilter.addEventListener('change', function() {
 
 <script>
 function loadAvailableBikes() {
-  const pickup = document.getElementById("pickupDate").value;
-  const dropoff = document.getElementById("dropoffDate").value;
+  const pickup = pickupDate.value;
+  const dropoff = dropoffDate.value;
   const container = document.getElementById("bikeList");
 
   if (!pickup || !dropoff) {
@@ -552,18 +571,23 @@ function loadAvailableBikes() {
 
   container.innerHTML = `
     <div class="text-center my-3">
-      <div class="spinner-border"></div>
+      <div class="spinner-border text-primary"></div>
     </div>`;
 
-  fetch(`/ajax/available-bikes/?pickup_date=${pickup.replace(" ", "T")}&dropoff_date=${dropoff.replace(" ", "T")}`)
-    .then(response => response.json())
+  fetch(`/ajax/available-bikes/?pickup_date=${encodeURIComponent(pickup)}&dropoff_date=${encodeURIComponent(dropoff)}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+      return response.json();
+    })
     .then(bikes => {
       container.innerHTML = "";
 
       if (bikes.length === 0) {
         container.innerHTML = `
           <div class="alert alert-warning text-center fw-bold">
-            🚫 No bikes available
+            🚫 No bikes available for selected date
           </div>`;
         return;
       }
@@ -586,6 +610,13 @@ function loadAvailableBikes() {
             </div>
           </div>`;
       });
+    })
+    .catch(error => {
+      console.error(error);
+      container.innerHTML = `
+        <div class="alert alert-danger text-center">
+          ⚠️ Failed to load bikes. Please try again.
+        </div>`;
     });
 }
 
@@ -617,8 +648,8 @@ function selectBike(id, bikeNumber, rent) {
 
 pickupDate.addEventListener('change', loadAvailableBikes);
 dropoffDate.addEventListener('change', loadAvailableBikes);
-
 </script>
+
 
 </body>
 </html>

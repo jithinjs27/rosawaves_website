@@ -159,20 +159,29 @@ def return_bookings(request):
 def generate_bill(request, booking_id):
     booking = get_object_or_404(BikeRental, id=booking_id)
 
-    # Example Bill Calculation
-    rental_rate = 500  # per day
-    try:
-        rental_days = int(booking.rental_days)
-    except Exception:
-        rental_days = 0
+    # Get the bike object (single record)
+    bike = get_object_or_404(
+        BikeModel,
+        Vehicle_number=booking.bike_number
+    )
 
-    total_amount = rental_days * rental_rate
-    balance = total_amount - booking.advance_amount - booking.deposit_amount
+    rental_rate = bike.rent_per_day
+
+    # Values from booking
+    total_rent = booking.total_bill_amount   # already calculated rent
+    deposit = booking.deposit_amount
+    advance = booking.advance_amount
+
+    # Final calculations
+    total_amount = total_rent + deposit
+    balance = total_amount - advance
 
     context = {
         "booking": booking,
         "rental_rate": rental_rate,
-        "rental_days": rental_days,
+        "total_rent": total_rent,
+        "deposit": deposit,
+        "advance": advance,
         "total_amount": total_amount,
         "balance": balance,
     }

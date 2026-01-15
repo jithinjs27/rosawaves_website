@@ -20,6 +20,8 @@ urlpatterns = [
 
     # Static pages
     path('contact/', views.contact_view, name='contact'),
+    path('invoice/<int:booking_id>/', views.download_invoice, name='download_invoice'),
+
 
     # Razorpay (only if you still use AJAX somewhere)
     path('create-order/', views.create_razorpay_order, name='create_razorpay_order'),
